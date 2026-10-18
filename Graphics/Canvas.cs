@@ -5,15 +5,13 @@ public class Canvas
     private readonly Texture _initialState;
     private readonly Texture _renderCanvas;
     public char BackgroundChar { get; set; } = ' ';
-    public int Width { get; init; }
-    public int Height { get; init; }
+    public int Width => _renderCanvas.Width;
+    public int Height => _renderCanvas.Height;
 
     public List<Texture> Textures { get; set; } = [];
 
     public Canvas(int width, int height, char backgroundChar = ' ')
     {
-        Width = width;
-        Height = height;
         BackgroundChar = backgroundChar;
         _initialState = new Texture(height, width, BackgroundChar);
         _renderCanvas = new Texture(height, width, BackgroundChar);

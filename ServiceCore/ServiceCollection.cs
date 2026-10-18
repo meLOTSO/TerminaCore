@@ -39,7 +39,7 @@ public class ServiceCollection : IServiceCollection, IServiceCollectionBuilder
     {
         var service = GetService<TService>();
         if (service is null)
-            throw new ArgumentException($"Сервис '{nameof(TService)}' не был найден.");
+            throw new ArgumentException($"Сервис '{typeof(TService).Name}' не был найден.");
         return service;
     }
 }
