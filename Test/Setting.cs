@@ -1,14 +1,22 @@
 using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;
+using Graphics;
 
 public class Setting : IControl, IDrawable
 {
-    public char[] Buffer { get; set; } = new[] { 'S', 'p', 'a', 'c', 'e', '\n', 'R', 'o', 'o', 't' };
+    public Texture Texture { get; set; }
+
+    public Setting()
+    {
+        Texture = new(
+            "Space",
+            "Root");
+    }
 
     public void OnKeyPress(GameContext context, ControlContext controlContext)
     {
-        if (controlContext.Key == ConsoleKey.Enter)
+        if (controlContext.Key == ConsoleKey.Escape)
         {
             context.SetState("menu");
         }
@@ -16,6 +24,6 @@ public class Setting : IControl, IDrawable
 
     public void Draw(DrawContext context)
     {
-        Console.WriteLine(Buffer);
+        context.Draw(Texture);
     }
 }

@@ -4,8 +4,17 @@ using ServiceCore.Abstract;
 
 public static class GraphicExtensions
 {
-    public static void AddASCIIGraphic(this IServiceCollectionBuilder services, int width, int height, char backgroundChar = ' ')
+    public static void AddASCIIGraphic(this IServiceCollectionBuilder services,
+        int width, int height, char backgroundChar = ' ',
+        ConsoleColor foregroundColor = ConsoleColor.Black, ConsoleColor backgroundColor = ConsoleColor.White)
     {
+        if (width < 0 || height < 0)
+            throw new ArgumentException("Ширина и высота окна должны иметь положительные значения.");
+
+        Console.ForegroundColor = foregroundColor;
+        Console.BackgroundColor = backgroundColor;
+        Console.SetWindowSize(width, height);
+        Console.Clear();
         services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar));
     }
 
@@ -17,6 +26,8 @@ public static class GraphicExtensions
         gameApplication.BeforeDraw += canvas.Clear;
         gameApplication.AfterDraw += canvas.Render;
         gameApplication.AfterDraw += canvas.Display;
+        gameApplication.AfterFrame += canvas.Textures.Clear;
+        gameApplication.AfterStop += Console.ResetColor;
     }
 
     public static void Draw(this DrawContext context, Texture texture)
@@ -24,5 +35,10 @@ public static class GraphicExtensions
         Canvas? canvas = context.Services.GetService<Canvas>();
         if (canvas is null) return;
         canvas.Draw(texture);
+    }
+    public static void CanvasWidth(this DrawContext context)
+    {
+        Canvas? canvas = context.Services.GetService<Canvas>();
+        if (canvas is null) return;
     }
 }

@@ -31,6 +31,9 @@ public class Texture
         Height = res.Height;
         Width = res.Width;
     }
+    public Texture(params string[] lines) : this(lines.ToList())
+    {
+    }
 
     public Texture(string path)
     {

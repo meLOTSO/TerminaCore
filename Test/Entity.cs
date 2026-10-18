@@ -2,12 +2,14 @@ using System.Text;
 using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;
+using Graphics;
 
 public class Entity : IControl, IDrawable
 {
     private int _currentIndex = 0;
 
     public List<string> Menu { get; set; } = [];
+    public Texture Texture { get; set; }
     public int CurrentIndex
     {
         get => _currentIndex;
@@ -28,6 +30,7 @@ public class Entity : IControl, IDrawable
         {
             "Start", "Settings", "Exit"
         };
+        Texture = new(Menu);
     }
 
     public void OnKeyPress(GameContext context, ControlContext controlContext)
@@ -49,19 +52,18 @@ public class Entity : IControl, IDrawable
     }
     public void Draw(DrawContext context)
     {
+        List<string> menu = new();
         for (int i = 0; i < Menu.Count; i++)
         {
             if (i == CurrentIndex)
             {
-                Console.BackgroundColor = ConsoleColor.White;
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.WriteLine($"> {Menu[i].PadRight(10)}");
-                Console.ResetColor();
+                menu.Add($"> {Menu[i]}");
             }
             else
             {
-                Console.WriteLine($"{Menu[i].PadRight(12)}");
+                menu.Add(Menu[i]);
             }
         }
+        context.Draw(new Texture(menu));
     }
 }

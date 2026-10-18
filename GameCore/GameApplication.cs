@@ -18,12 +18,15 @@ public class GameApplication : GameBase
     public DrawContext DrawContext { get; private set; }
 
     public event Action? PreFrame;
+    public event Action? AfterFrame;
     public event Action? BeforeDraw;
     public event Action? AfterDraw;
     public event Action? BeforeUpdate;
     public event Action? AfterUpdate;
     public event Action? BeforeOnKeyPress;
     public event Action? AfterOnKeyPress;
+    public event Action? BeforeStop;
+    public event Action? AfterStop;
 
     public GameApplication(GameBase gameBase) : this()
     {
@@ -82,6 +85,7 @@ public class GameApplication : GameBase
     {
         Console.CursorVisible = false;
         Console.Clear();
+        Console.TreatControlCAsInput = true;
         _run = true;
 
         long prevTimestamp = Stopwatch.GetTimestamp();
@@ -96,6 +100,7 @@ public class GameApplication : GameBase
             OnKeyPress();
             Update();
             Draw();
+            AfterFrame?.Invoke();
 
             TimeSpan elapsed = Stopwatch.GetElapsedTime(frameStartTimestamp);
             int sleepTime = TargetDeltaTimeMS - (int)elapsed.TotalMilliseconds;
@@ -107,5 +112,10 @@ public class GameApplication : GameBase
         Console.CursorVisible = true;
     }
 
-    public void Stop() => _run = false;
+    public void Stop()
+    {
+        BeforeStop?.Invoke();
+        _run = false;
+        AfterStop?.Invoke();
+    }
 }
