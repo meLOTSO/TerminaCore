@@ -1,3 +1,4 @@
+using System.Text;
 using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;

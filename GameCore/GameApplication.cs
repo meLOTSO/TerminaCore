@@ -8,14 +8,22 @@ public class GameApplication : GameBase
 {
     private bool _run = false;
 
-    public IServiceCollection Services { get; init; } = new ServiceCollection();
     public int TargetDeltaTimeMS { get; set; } = 1000 / 60; // заданная дельта
     public float DeltaTimeSeconds { get; private set; } // фактическая дельта
-    public GameContext GameContext { get; private set; }
-    public ControlContext ControlContext { get; set; } = new();
-    public DrawContext DrawContext { get; set; } = new();
 
-    public Action? PreFrame { get; set; }
+    public IServiceCollection Services { get; init; } = new ServiceCollection();
+    public GameContext GameContext { get; private set; }
+
+    public ControlContext ControlContext { get; private set; }
+    public DrawContext DrawContext { get; private set; }
+
+    public event Action? PreFrame;
+    public event Action? BeforeDraw;
+    public event Action? AfterDraw;
+    public event Action? BeforeUpdate;
+    public event Action? AfterUpdate;
+    public event Action? BeforeOnKeyPress;
+    public event Action? AfterOnKeyPress;
 
     public GameApplication(GameBase gameBase) : this()
     {
@@ -26,29 +34,35 @@ public class GameApplication : GameBase
     public GameApplication()
     {
         GameContext = new GameContext(this);
+        ControlContext = new ControlContext(this);
+        DrawContext = new DrawContext(this);
     }
 
     private void Update()
     {
+        BeforeUpdate?.Invoke();
         foreach (var u in UpdateCollection)
         {
             u.Invoke(GameContext);
         }
+        AfterUpdate?.Invoke();
     }
 
     private void Draw()
     {
-        Console.SetCursorPosition(0, 0);
+        BeforeDraw?.Invoke();
         foreach (var d in DrawCollection)
         {
             d.Invoke(DrawContext);
         }
+        AfterDraw?.Invoke();
     }
 
     private void OnKeyPress()
     {
         if (Console.KeyAvailable)
         {
+            BeforeOnKeyPress?.Invoke();
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);
             ControlContext.Pressed = true;
             ControlContext.Key = key.Key;
@@ -57,6 +71,7 @@ public class GameApplication : GameBase
             {
                 c.Invoke(GameContext, ControlContext);
             }
+            AfterOnKeyPress?.Invoke();
         }
         ControlContext.Pressed = false;
         ControlContext.Key = default;

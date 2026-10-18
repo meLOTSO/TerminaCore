@@ -23,7 +23,7 @@ public static class StateMachineExtensions
         var stateMachine = gameApplication.Services.GetService<StateMachine<string, IGameScene>>();
         if (stateMachine is null) return;
 
-        gameApplication.PreFrame = stateMachine.ApplyPendingState;
+        gameApplication.PreFrame += stateMachine.ApplyPendingState;
 
         stateMachine.AddOnStateChangeHandler(stateContext =>
         {

@@ -1,17 +1,13 @@
 namespace GameCore;
 
-public class GameContext
+public class GameContext : ContextBase
 {
-    private readonly GameApplication _gameApplication;
+    public int DeltaTimeMS => GameApplication.TargetDeltaTimeMS;
+    public float DeltaTimeSeconds => GameApplication.DeltaTimeSeconds;
 
-    public int DeltaTimeMS => _gameApplication.TargetDeltaTimeMS;
-    public float DeltaTimeSeconds => _gameApplication.DeltaTimeSeconds;
-    public IServiceCollection Services => _gameApplication.Services;
-
-    public GameContext(GameApplication gameApplication)
+    public GameContext(GameApplication gameApplication) : base(gameApplication)
     {
-        _gameApplication = gameApplication;
     }
 
-    public void Stop() => _gameApplication.Stop();
+    public void Stop() => GameApplication.Stop();
 }
