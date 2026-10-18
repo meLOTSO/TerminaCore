@@ -36,9 +36,16 @@ public static class GraphicExtensions
         if (canvas is null) return;
         canvas.Draw(texture);
     }
-    public static void CanvasWidth(this DrawContext context)
+    public static int GetCanvasWidth(this DrawContext context)
     {
         Canvas? canvas = context.Services.GetService<Canvas>();
-        if (canvas is null) return;
+        if (canvas is null) return 0;
+        return canvas.Width;
+    }
+    public static int GetCanvasHeight(this DrawContext context)
+    {
+        Canvas? canvas = context.Services.GetService<Canvas>();
+        if (canvas is null) return 0;
+        return canvas.Height;
     }
 }
