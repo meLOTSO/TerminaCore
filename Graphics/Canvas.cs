@@ -1,4 +1,4 @@
-using Graphics;
+namespace Graphics;
 
 public class Canvas
 {
