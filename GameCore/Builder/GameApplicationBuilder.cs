@@ -14,7 +14,7 @@ public class GameApplicationBuilder : GameBase, IGameFunctionalMutable
     public List<OnKeyPressDelegate> OnKeyPresses { get => OnKeyPressCollection; set => OnKeyPressCollection = value; }
     public List<DrawDelegate> Draws { get => DrawCollection; set => DrawCollection = value; }
 
-    public void Entity<T>(T entity) where T : class, IGameFunc
+    public void Entity<T>(T entity) where T : class, IEntityFunc
     {
         if (entity is IUpdateable u) UpdateCollection.Add(u.Update);
         if (entity is IControl c) OnKeyPressCollection.Add(c.OnKeyPress);

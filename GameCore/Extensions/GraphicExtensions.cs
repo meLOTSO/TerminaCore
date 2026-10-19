@@ -13,7 +13,8 @@ public static class GraphicExtensions
 
         Console.ForegroundColor = foregroundColor;
         Console.BackgroundColor = backgroundColor;
-        Console.SetWindowSize(width, height);
+        if (OperatingSystem.IsWindows())
+            Console.SetWindowSize(width, height);
         Console.Clear();
         services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar));
     }
@@ -35,6 +36,18 @@ public static class GraphicExtensions
         Canvas? canvas = context.Services.GetService<Canvas>();
         if (canvas is null) return;
         canvas.Draw(texture);
+    }
+    public static int GetCanvasWidth(this GameContext context)
+    {
+        Canvas? canvas = context.Services.GetService<Canvas>();
+        if (canvas is null) return 0;
+        return canvas.Width;
+    }
+    public static int GetCanvasHeight(this GameContext context)
+    {
+        Canvas? canvas = context.Services.GetService<Canvas>();
+        if (canvas is null) return 0;
+        return canvas.Height;
     }
     public static int GetCanvasWidth(this DrawContext context)
     {

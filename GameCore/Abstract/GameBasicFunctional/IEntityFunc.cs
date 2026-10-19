@@ -1,5 +1,5 @@
 namespace GameCore.Abstract.GameBasicFunctional;
 
-public interface IGameFunc
+public interface IEntityFunc
 {
 }

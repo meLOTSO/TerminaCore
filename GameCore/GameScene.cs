@@ -9,7 +9,7 @@ public class GameScene : IGameScene
     private DrawDelegate? _draw;
     private OnKeyPressDelegate? _onKeyPress;
 
-    public static GameScene FromEntity<T>(T entity) where T : class, IGameFunc
+    public static GameScene FromEntity<T>(T entity) where T : class, IEntityFunc
     {
         var gameScene = new GameScene();
         if (entity is IUpdateable u) gameScene.Update = u.Update;
