@@ -3,7 +3,7 @@ using GameCore.Extensions;
 using Graphics;
 using GameCore.Contexts;
 
-public class Entity : EntityBase, IControl, IDrawable
+public class Entity : GameEnvironmentBase, IControl, IDrawable
 {
     private int _currentIndex = 0;
     private Game _gameEntity;
@@ -45,8 +45,7 @@ public class Entity : EntityBase, IControl, IDrawable
             switch (CurrentIndex)
             {
                 case 0:
-                    _gameEntity.Texture.X = 0;
-                    _gameEntity.Texture.Y = 0;
+                    _gameEntity.Reset();
                     GameContext.SetState("game");
                     break;
                 case 1: GameContext.SetState("setting"); break;

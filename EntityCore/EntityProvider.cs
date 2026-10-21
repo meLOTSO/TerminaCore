@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using EntityCore.Abstract;
+using Debug;
 
 namespace EntityCore;
 

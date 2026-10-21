@@ -3,10 +3,10 @@ using GameCore.Contexts;
 
 namespace GameCore.Abstract.GameBasicFunctional;
 
-public abstract class EntityBase : IEntity
+public abstract class GameEnvironmentBase : IGameEnvironment
 {
     protected readonly GameContext GameContext;
-    public EntityBase(GameContext context)
+    public GameEnvironmentBase(GameContext context)
     {
         GameContext = context;
     }

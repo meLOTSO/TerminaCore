@@ -3,7 +3,7 @@ using GameCore.Extensions;
 using GameCore.Contexts;
 using Graphics;
 
-public class Game : EntityBase, IControl, IDrawable, IUpdateable
+public class Game : GameEnvironmentBase, IControl, IDrawable, IUpdateable
 {
     public Texture Texture { get; set; }
     public Texture Some { get; set; }
@@ -16,6 +16,14 @@ public class Game : EntityBase, IControl, IDrawable, IUpdateable
         Some = new Texture(
             "|-|",
             "fdf");
+    }
+
+    public void Reset()
+    {
+        Texture.X = 0;
+        Texture.Y = 0;
+        SpeedX = 0;
+        SpeedY = 0;
     }
 
     public void OnKeyPress(ControlContext controlContext)

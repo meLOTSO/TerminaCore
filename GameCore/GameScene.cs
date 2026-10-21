@@ -18,20 +18,20 @@ public class GameScene : IGameScene
     public OnKeyPressDelegate? OnKeyPress { get => _onKeyPress; set => _onKeyPress = value; }
     public KeyValuePair<Type, Func<GameContext, object>> FactoryItem { get => _factoryItem; }
 
-    public static GameScene FromEntity<T>() where T : class, IEntity
+    public static GameScene FromGameEnvironment<T>() where T : class, IGameEnvironment
     {
         var gameScene = new GameScene();
 
         Type type = typeof(T);
         if (type.GetConstructor([typeof(GameContext)]) is ConstructorInfo ctor)
-            gameScene.UseEntity<T>(gameContext => ctor.Invoke([gameContext]));
+            gameScene.UseGameEnvironment<T>(gameContext => ctor.Invoke([gameContext]));
         else if (type.GetConstructor(Type.EmptyTypes) is ConstructorInfo emptyCtor)
-            gameScene.UseEntity<T>(_ => emptyCtor.Invoke(null));
+            gameScene.UseGameEnvironment<T>(_ => emptyCtor.Invoke(null));
 
         return gameScene;
     }
 
-    public void UseEntity<T>(Func<GameContext, object> factory) where T : class, IEntity
+    public void UseGameEnvironment<T>(Func<GameContext, object> factory) where T : class, IGameEnvironment
     {
         _factoryItem = new KeyValuePair<Type, Func<GameContext, object>>(typeof(T), factory);
     }

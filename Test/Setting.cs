@@ -3,7 +3,7 @@ using GameCore.Extensions;
 using GameCore.Contexts;
 using Graphics;
 
-public class Setting : EntityBase, IControl, IDrawable
+public class Setting : GameEnvironmentBase, IControl, IDrawable
 {
     public Texture Texture { get; set; }
 

@@ -13,7 +13,7 @@ namespace GameCore.Builder;
 
 public class GameApplicationBuilder : GameBase
 {
-    private readonly Dictionary<Type, Func<GameContext, object>> _entityFactories = new(); // object Factory(GameContext context)
+    private readonly Dictionary<Type, Func<GameContext, object>> _environmentFactories = new(); // object Factory(GameContext context)
     private readonly ServiceCollection _services = new(); // сервисы
     private readonly EntityCollection _entitiesCollection = new(); // мониторинг сущностей
 
@@ -26,18 +26,18 @@ public class GameApplicationBuilder : GameBase
     public List<DrawDelegate> Draws { get => DrawCollection; set => DrawCollection = value; }
 
     // Создание фабрики для сущности
-    public void Entity<T>() where T : class, IEntity
+    public void UseGameEnvironment<T>() where T : class, IGameEnvironment
     {
         // Сущность, которому передается конструктор GameContext, не может быть создана без передачи параметра, поэтому сохраняем фабрику для создания сущности
         if (typeof(T).GetConstructor([typeof(GameContext)]) is ConstructorInfo ctor)
         {
-            _entityFactories.Add(typeof(T), (context) => ctor.Invoke([context]));
+            _environmentFactories.Add(typeof(T), (context) => ctor.Invoke([context]));
             return;
         }
         // Сущность с конструктором без параметров создаем и сразу регистрируем игровые функции
         else if (typeof(T).GetConstructor(Type.EmptyTypes) is ConstructorInfo emptyCtor)
         {
-            _entityFactories.Add(typeof(T), _ => emptyCtor.Invoke(null));
+            _environmentFactories.Add(typeof(T), _ => emptyCtor.Invoke(null));
             return;
         }
         else
@@ -47,7 +47,7 @@ public class GameApplicationBuilder : GameBase
     }
 
     // регистрация игровых функций сущности
-    private void RegisterEntityFunctions(GameApplication gameApplication, object entity)
+    private static void RegisterEnvitonmentFunctions(GameApplication gameApplication, object entity)
     {
         if (entity is IUpdateable u) gameApplication.UpdateCollection.Add(u.Update);
         if (entity is IControl c) gameApplication.OnKeyPressCollection.Add(c.OnKeyPress);
@@ -61,10 +61,10 @@ public class GameApplicationBuilder : GameBase
             Services = _services.BuildServiceProvider(),
             Entities = _entitiesCollection.BuildEntityProvider()
         };
-        foreach ((Type entityType, Func<GameContext, object> factory) in _entityFactories)
+        foreach ((Type entityType, Func<GameContext, object> factory) in _environmentFactories)
         {
             object entity = factory.Invoke(game.GameContext);
-            RegisterEntityFunctions(game, entity);
+            RegisterEnvitonmentFunctions(game, entity);
             game.Entities.TryReleaseEntity(entityType, entity);
         }
 
