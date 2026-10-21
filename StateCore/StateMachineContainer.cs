@@ -2,13 +2,13 @@ using StateCore.Delegates;
 
 namespace StateCore;
 
-public class StateMachineContainer<TKey> where TKey : notnull
+public class StateMachineContainer<TKey, TValue> where TKey : notnull
 {
     protected event SetStateDelegate<TKey>? OnSetState = null;
 
-    public StateMachineContainer<TKey> AddStateMachine(SetStateDelegate<TKey> setState)
+    public StateMachineContainer<TKey, TValue> AddStateMachine(StateMachine<TKey, TValue> stateMachine)
     {
-        OnSetState += setState;
+        OnSetState += (state) => stateMachine.SetState(state);
         return this;
     }
 
