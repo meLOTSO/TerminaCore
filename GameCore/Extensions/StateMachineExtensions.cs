@@ -1,5 +1,6 @@
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Delegates;
+using GameCore.Contexts;
 using ServiceCore.Abstract;
 using StateCore;
 using StateCore.Builder;
@@ -9,7 +10,7 @@ namespace GameCore.Extensions;
 public static class StateMachineExtensions
 {
     public static void AddStateMachine(
-        this IServiceCollectionBuilder services,
+        this IServiceCollection services,
         Action<StateMachineBuilder<string, IGameScene>> configure)
     {
         var builder = new StateMachineBuilder<string, IGameScene>();
@@ -24,6 +25,23 @@ public static class StateMachineExtensions
         if (stateMachine is null) return;
 
         gameApplication.PreFrame += stateMachine.ApplyPendingState;
+
+        foreach (var stateValuePair in stateMachine.StateValueData)
+        {
+            foreach (IGameScene gameScene in stateValuePair.Value)
+            {
+                Type type = gameScene.FactoryItem.Key;
+                var factory = gameScene.FactoryItem.Value;
+                object entity = factory.Invoke(gameApplication.GameContext);
+
+                if (entity is IUpdateable u) gameScene.Update = u.Update;
+                if (entity is IControl c) gameScene.OnKeyPress = c.OnKeyPress;
+                if (entity is IDrawable d) gameScene.Draw = d.Draw;
+
+                FileDebug.WriteLine($"UseStateMachine: TryReleaseEntity({type.Name}, {entity})");
+                gameApplication.Entities.TryReleaseEntity(type, entity);
+            }
+        }
 
         stateMachine.AddOnStateChangeHandler(stateContext =>
         {
@@ -41,10 +59,10 @@ public static class StateMachineExtensions
     }
 
     public static StateContext<string, IGameScene>? GetStateContext(
-        this IServiceCollection serviceCollection
+        this ServiceCore.Abstract.IServiceProvider serviceProvider
     )
     {
-        var service = serviceCollection.GetService<StateMachine<string, IGameScene>>();
+        var service = serviceProvider.GetService<StateMachine<string, IGameScene>>();
         if (service is null) return null;
         return service.StateContext;
     }

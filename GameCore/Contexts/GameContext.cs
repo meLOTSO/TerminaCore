@@ -1,9 +1,12 @@
-namespace GameCore;
+using EntityCore.Abstract;
 
-public class GameContext : ContextBase
+namespace GameCore.Contexts;
+
+public class GameContext : GameCore.Abstract.ContextBase
 {
     public int DeltaTimeMS => GameApplication.TargetDeltaTimeMS;
     public float DeltaTimeSeconds => GameApplication.DeltaTimeSeconds;
+    public IEntityProvider Entities => GameApplication.Entities;
 
     public GameContext(GameApplication gameApplication) : base(gameApplication)
     {

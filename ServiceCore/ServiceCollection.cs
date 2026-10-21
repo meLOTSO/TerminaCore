@@ -1,45 +1,30 @@
-using ServiceCore.Abstract;
 
 namespace ServiceCore;
 
-public class ServiceCollection : IServiceCollection, IServiceCollectionBuilder
+public class ServiceCollection : Abstract.IServiceCollection
 {
-    protected readonly Dictionary<Type, object> SingletonServices = new();
-    protected readonly Dictionary<Type, Func<object>> TransientServices = new();
+    protected Dictionary<Type, ServiceBag> Services = new();
 
-    public void AddSingleton<TService>(Func<object> func)
+    public void AddService<TService>(Enums.ServiceRuntime runtime, Func<object> factory)
     {
-        var serviceObj = func.Invoke();
-        SingletonServices.Add(typeof(TService), serviceObj!);
-    }
-    public void AddSingleton<TService>(object serviceObj)
-    {
-        SingletonServices.Add(typeof(TService), serviceObj);
+        if (runtime == ServiceCore.Enums.ServiceRuntime.Singleton) AddSingleton<TService>(factory);
+        else AddTransient<TService>(factory);
     }
 
-    public void AddTransient<TService>(Func<object> func)
+    public void AddSingleton<TService>(Func<object> factory)
     {
-        TransientServices.Add(typeof(TService), func);
+        var lazy = new Lazy<object>(factory);
+        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Singleton, () => lazy.Value);
+    }
+    public void AddSingleton<TService>(object service)
+    {
+        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Singleton, () => service);
     }
 
-    public TService? GetService<TService>()
+    public void AddTransient<TService>(Func<object> factory)
     {
-        if (TransientServices.TryGetValue(typeof(TService), out Func<object>? tfunc))
-        {
-            var tservice = tfunc.Invoke();
-            return (TService)tservice;
-        }
-        else if (SingletonServices.TryGetValue(typeof(TService), out object? svalue))
-        {
-            return (TService)svalue;
-        }
-        return default;
+        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Transient, factory);
     }
-    public TService GetServiceRequired<TService>()
-    {
-        var service = GetService<TService>();
-        if (service is null)
-            throw new ArgumentException($"Сервис '{typeof(TService).Name}' не был найден.");
-        return service;
-    }
+
+    public Abstract.IServiceProvider BuildServiceProvider() => new ServiceProvider(Services);
 }

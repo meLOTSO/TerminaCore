@@ -1,6 +1,6 @@
-using GameCore;
+namespace GameCore.Contexts;
 
-public class ControlContext : ContextBase
+public class ControlContext : GameCore.Abstract.ContextBase
 {
     public ConsoleKey Key { get; set; }
     public ConsoleModifiers Modifiers { get; set; }

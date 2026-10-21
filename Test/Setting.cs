@@ -1,24 +1,24 @@
-using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;
+using GameCore.Contexts;
 using Graphics;
 
-public class Setting : IControl, IDrawable
+public class Setting : EntityBase, IControl, IDrawable
 {
     public Texture Texture { get; set; }
 
-    public Setting()
+    public Setting(GameContext context) : base(context)
     {
         Texture = new(
             "Space",
             "Root");
     }
 
-    public void OnKeyPress(GameContext context, ControlContext controlContext)
+    public void OnKeyPress(ControlContext controlContext)
     {
         if (controlContext.Key == ConsoleKey.Escape)
         {
-            context.SetState("menu");
+            GameContext.SetState("menu");
         }
     }
 

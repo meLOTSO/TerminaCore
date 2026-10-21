@@ -1,7 +1,6 @@
-using GameCore;
-using ServiceCore.Abstract;
+namespace GameCore.Contexts;
 
-public class DrawContext : ContextBase
+public class DrawContext : GameCore.Abstract.ContextBase
 {
     public DrawContext(GameApplication gameApplication) : base(gameApplication)
     {

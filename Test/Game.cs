@@ -1,24 +1,24 @@
-using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;
+using GameCore.Contexts;
 using Graphics;
 
-public class Game : IControl, IDrawable, IUpdateable
+public class Game : EntityBase, IControl, IDrawable, IUpdateable
 {
     public Texture Texture { get; set; }
     public Texture Some { get; set; }
     public int SpeedX { get; set; } = 0;
     public int SpeedY { get; set; } = 0;
 
-    public Game()
+    public Game(GameContext context) : base(context)
     {
-        Texture = new(@"C:\Users\MOLL\OneDrive\Документы\KAI\7 семестр\ТВППИТС (паттерны программирования)\lab1\code\Test\texture.txt");
+        Texture = new(@"C:\Users\MOLL\OneDrive\Документы\KAI\7 семестр\ТВП ИТС (паттерны программирования)\lab1\code\Test\texture.txt");
         Some = new Texture(
             "|-|",
             "fdf");
     }
 
-    public void OnKeyPress(GameContext context, ControlContext controlContext)
+    public void OnKeyPress(ControlContext controlContext)
     {
         if (controlContext.Key == ConsoleKey.RightArrow)
         {
@@ -42,7 +42,7 @@ public class Game : IControl, IDrawable, IUpdateable
         }
         else if (controlContext.Key == ConsoleKey.Escape)
         {
-            context.SetState("menu");
+            GameContext.SetState("menu");
         }
     }
 
@@ -52,7 +52,7 @@ public class Game : IControl, IDrawable, IUpdateable
         context.Draw(Texture);
     }
 
-    public void Update(GameContext context)
+    public void Update(UpdateContext context)
     {
         Texture.X += SpeedX;
         Texture.Y += SpeedY;

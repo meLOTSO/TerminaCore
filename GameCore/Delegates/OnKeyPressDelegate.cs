@@ -1,3 +1,3 @@
 namespace GameCore.Delegates;
 
-public delegate void OnKeyPressDelegate(GameContext context, ControlContext controlContext);
+public delegate void OnKeyPressDelegate(GameCore.Contexts.ControlContext controlContext);

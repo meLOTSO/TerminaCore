@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using EntityCore;
+using EntityCore.Abstract;
 using GameCore.Abstract.GameBasicFunctional;
-using ServiceCore;
+using GameCore.Contexts;
 
 namespace GameCore;
 
@@ -11,9 +13,10 @@ public class GameApplication : GameBase
     public int TargetDeltaTimeMS { get; set; } = 1000 / 60; // заданная дельта
     public float DeltaTimeSeconds { get; private set; } // фактическая дельта
 
-    public IServiceCollection Services { get; init; } = new ServiceCollection();
+    public ServiceCore.Abstract.IServiceProvider Services { get; init; } = new ServiceProvider();
+    public IEntityProvider Entities { get; init; } = new EntityProvider();
     public GameContext GameContext { get; private set; }
-
+    public UpdateContext UpdateContext { get; private set; }
     public ControlContext ControlContext { get; private set; }
     public DrawContext DrawContext { get; private set; }
 
@@ -30,13 +33,14 @@ public class GameApplication : GameBase
 
     public GameApplication(GameBase gameBase) : this()
     {
-        UpdateCollection = gameBase.UpdateCollection;
-        OnKeyPressCollection = gameBase.OnKeyPressCollection;
-        DrawCollection = gameBase.DrawCollection;
+        UpdateCollection = new List<Delegates.UpdateDelegate>(gameBase.UpdateCollection);
+        OnKeyPressCollection = new List<Delegates.OnKeyPressDelegate>(gameBase.OnKeyPressCollection);
+        DrawCollection = new List<Delegates.DrawDelegate>(gameBase.DrawCollection);
     }
     public GameApplication()
     {
         GameContext = new GameContext(this);
+        UpdateContext = new UpdateContext(this);
         ControlContext = new ControlContext(this);
         DrawContext = new DrawContext(this);
     }
@@ -46,7 +50,7 @@ public class GameApplication : GameBase
         BeforeUpdate?.Invoke();
         foreach (var u in UpdateCollection)
         {
-            u.Invoke(GameContext);
+            u.Invoke(UpdateContext);
         }
         AfterUpdate?.Invoke();
     }
@@ -63,7 +67,7 @@ public class GameApplication : GameBase
 
     private void OnKeyPress()
     {
-        if (Console.KeyAvailable)
+        while (Console.KeyAvailable)
         {
             BeforeOnKeyPress?.Invoke();
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);
@@ -72,7 +76,7 @@ public class GameApplication : GameBase
             ControlContext.Modifiers = key.Modifiers;
             foreach (var c in OnKeyPressCollection)
             {
-                c.Invoke(GameContext, ControlContext);
+                c.Invoke(ControlContext);
             }
             AfterOnKeyPress?.Invoke();
         }

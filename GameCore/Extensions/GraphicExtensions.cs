@@ -1,10 +1,11 @@
 using GameCore;
 using Graphics;
 using ServiceCore.Abstract;
+using GameCore.Contexts;
 
 public static class GraphicExtensions
 {
-    public static void AddASCIIGraphic(this IServiceCollectionBuilder services,
+    public static void AddASCIIGraphic(this IServiceCollection services,
         int width, int height, char backgroundChar = ' ',
         ConsoleColor foregroundColor = ConsoleColor.Black, ConsoleColor backgroundColor = ConsoleColor.White)
     {

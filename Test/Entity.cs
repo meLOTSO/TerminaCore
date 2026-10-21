@@ -1,12 +1,12 @@
-using System.Text;
-using GameCore;
 using GameCore.Abstract.GameBasicFunctional;
 using GameCore.Extensions;
 using Graphics;
+using GameCore.Contexts;
 
-public class Entity : IControl, IDrawable
+public class Entity : EntityBase, IControl, IDrawable
 {
     private int _currentIndex = 0;
+    private Game _gameEntity;
 
     public List<string> Menu { get; set; } = [];
     public Texture Texture { get; set; }
@@ -24,16 +24,17 @@ public class Entity : IControl, IDrawable
         }
     }
 
-    public Entity()
+    public Entity(GameContext context) : base(context)
     {
         Menu = new List<string>()
         {
             "Start", "Settings", "Exit"
         };
         Texture = new(Menu);
+        _gameEntity = context.Entities.GetEntityRequired<Game>();
     }
 
-    public void OnKeyPress(GameContext context, ControlContext controlContext)
+    public void OnKeyPress(ControlContext controlContext)
     {
         if (controlContext.Key == ConsoleKey.DownArrow)
             CurrentIndex++;
@@ -43,9 +44,13 @@ public class Entity : IControl, IDrawable
         {
             switch (CurrentIndex)
             {
-                case 0: context.SetState("game"); break;
-                case 1: context.SetState("setting"); break;
-                case 2: context.Stop(); break;
+                case 0:
+                    _gameEntity.Texture.X = 0;
+                    _gameEntity.Texture.Y = 0;
+                    GameContext.SetState("game");
+                    break;
+                case 1: GameContext.SetState("setting"); break;
+                case 2: GameContext.Stop(); break;
                 default: break;
             }
         }

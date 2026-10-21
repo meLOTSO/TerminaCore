@@ -1,10 +1,12 @@
 using StateCore.Delegates;
 using StateCore.Abstract;
+using System.Collections.Frozen;
+using System.Collections;
 
 namespace StateCore;
 
 // Главный аппарат машины состояний, инкапуслрующий в себе словарь состояний, смену состояний, события при смене состояния
-public class StateMachine<TKey, TValue> : StateMachineBase<TKey, TValue> where TKey : notnull
+public class StateMachine<TKey, TValue> where TKey : notnull
 {
     private TKey? _currentState = default; // текущее состояние
     private TKey? _nextState;
@@ -14,6 +16,7 @@ public class StateMachine<TKey, TValue> : StateMachineBase<TKey, TValue> where T
     // События смены состояния
     protected event StateChangedDelegate<TKey, TValue>? StateChangedEvent = null;
 
+    public FrozenDictionary<TKey, FrozenSet<TValue>> StateValueData { get; protected set; } = FrozenDictionary<TKey, FrozenSet<TValue>>.Empty;
     public StateBag<TKey, TValue> StateBag { get; private set; }
     // Предыдущее состояние
     public TKey? PreviousState { get; private set; }
@@ -41,9 +44,12 @@ public class StateMachine<TKey, TValue> : StateMachineBase<TKey, TValue> where T
     public StateContext<TKey, TValue> StateContext { get; private set; }
 
     // Добавляем словарь состояний-списка_значений
-    public StateMachine(Dictionary<TKey, List<TValue>> stateDictionary) : this()
+    public StateMachine(IDictionary<TKey, List<TValue>> stateDictionary) : this()
     {
-        StateValuePairs = stateDictionary;
+        StateValueData = stateDictionary.ToFrozenDictionary(
+            pair => pair.Key,
+            pair => pair.Value.ToFrozenSet()
+        );
     }
 
     // Регистрируем обработчик смены состояний для StateContext, связываем с методом SetState объекта StateMachine
@@ -79,7 +85,7 @@ public class StateMachine<TKey, TValue> : StateMachineBase<TKey, TValue> where T
     {
         PreviousState = _currentState;
         _currentState = toState;
-        CurrentValues = StateValuePairs.GetValueOrDefault(toState) ?? [];
+        CurrentValues = StateValueData.GetValueOrDefault(toState) ?? [];
 
         StateBag = new StateBag<TKey, TValue>
         {

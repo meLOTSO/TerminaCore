@@ -1,6 +1,6 @@
 namespace GameCore.Abstract.GameBasicFunctional;
 
-public interface IControl : IEntityFunc
+public interface IControl : IEntity
 {
-    public void OnKeyPress(GameContext context, ControlContext controlContext);
+    public void OnKeyPress(GameCore.Contexts.ControlContext controlContext);
 }
