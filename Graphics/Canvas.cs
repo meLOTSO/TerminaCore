@@ -34,38 +34,47 @@ public class Canvas
     {
         Console.CursorVisible = false;
 
+        Span<char> canvasSpan = _renderCanvas.Buffer.AsSpan();
+        int canvasStride = _renderCanvas.Width + 1; // ширина строки с учетом '\n'
+
         foreach (var texture in Textures)
         {
+            // Отсечение по вертикали
             int startY = Math.Max(0, texture.Y);
             int endY = Math.Min(_renderCanvas.Height, texture.Y + texture.Height);
 
+            // Отсечение по горизонтали
             int startX = Math.Max(0, texture.X);
             int endX = Math.Min(_renderCanvas.Width, texture.X + texture.Width);
 
             if (startX >= endX || startY >= endY)
                 continue;
 
+            ReadOnlySpan<char> textureSpan = texture.Buffer.AsSpan();
+            int textureStride = texture.Width + 1;
+            int copyWidth = endX - startX;
+
             for (int i = startY; i < endY; i++)
             {
                 int localY = i - texture.Y;
+                int localStartX = startX - texture.X;
 
-                for (int j = startX; j < endX; j++)
+                // Срезы строк для конкретного Y
+                ReadOnlySpan<char> srcRow = textureSpan.Slice(localY * textureStride + localStartX, copyWidth);
+                Span<char> dstRow = canvasSpan.Slice(i * canvasStride + startX, copyWidth);
+
+                // Копирование непрозрачных символов строки
+                for (int col = 0; col < copyWidth; col++)
                 {
-                    int localX = j - texture.X;
-
-                    char symbol = texture[localY, localX];
+                    char symbol = srcRow[col];
                     if (symbol != ' ' && symbol != '\0')
                     {
-                        _renderCanvas[i, j] = symbol;
+                        dstRow[col] = symbol;
                     }
                 }
             }
         }
     }
-
-    public void DisplayRow() => Console.Write(_renderCanvas.Buffer);
-
-    public void DisplayColumn() => Console.WriteLine(_renderCanvas.Buffer);
 
     public void Display()
     {
