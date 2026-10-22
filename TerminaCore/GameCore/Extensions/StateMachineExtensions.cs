@@ -5,12 +5,9 @@ using TerminaCore.ServiceCore.Abstract;
 using TerminaCore.StateCore;
 using TerminaCore.StateCore.Builder;
 using TerminaCore.Debug;
-using System;
-using System.Collections.Generic;
-using TerminaCore.GameCore;
 using TerminaCore.GameCore.Abstract;
 
-namespace GameCore.Extensions;
+namespace TerminaCore.GameCore.Extensions;
 
 public static class StateMachineExtensions
 {

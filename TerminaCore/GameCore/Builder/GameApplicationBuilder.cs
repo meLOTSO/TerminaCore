@@ -1,4 +1,3 @@
-using System;
 using TerminaCore.EntityCore;
 using TerminaCore.EntityCore.Abstract;
 using TerminaCore.GameCore.Abstract.GameBasicFunctional;
@@ -6,11 +5,8 @@ using TerminaCore.GameCore.Abstract;
 using TerminaCore.GameCore.Delegates;
 using TerminaCore.ServiceCore;
 using TerminaCore.ServiceCore.Abstract;
-using System.Collections.Generic;
-using TerminaCore.GameCore;
 
-namespace GameCore.Builder;
-
+namespace TerminaCore.GameCore.Builder;
 
 public class GameApplicationBuilder : GameBase
 {

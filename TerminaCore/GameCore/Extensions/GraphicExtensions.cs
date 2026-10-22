@@ -1,8 +1,8 @@
-using TerminaCore.GameCore;
 using TerminaCore.Graphics;
 using TerminaCore.ServiceCore.Abstract;
 using TerminaCore.GameCore.Contexts;
-using System;
+
+namespace TerminaCore.GameCore.Extensions;
 
 public static class GraphicExtensions
 {
