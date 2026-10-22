@@ -1,1 +1,0 @@
-public record struct ServiceBag(ServiceCore.Enums.ServiceRuntime Runtime, Func<object> Factory);
