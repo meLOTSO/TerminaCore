@@ -7,7 +7,7 @@ public class Setting : GameEnvironmentBase, IControl, IDrawable
 {
     public Texture Texture { get; set; }
 
-    public Setting(GameContext context) : base(context)
+    public Setting()
     {
         Texture = new(
             "Space",

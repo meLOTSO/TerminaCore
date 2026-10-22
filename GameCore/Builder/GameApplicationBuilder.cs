@@ -13,7 +13,7 @@ namespace GameCore.Builder;
 
 public class GameApplicationBuilder : GameBase
 {
-    private readonly Dictionary<Type, Func<GameContext, object>> _environmentFactories = new(); // object Factory(GameContext context)
+    private readonly Dictionary<Type, Func<object>> _environmentFactories = new(); // object Factory(GameContext context)
     private readonly ServiceCollection _services = new(); // сервисы
     private readonly EntityCollection _entitiesCollection = new(); // мониторинг сущностей
 
@@ -26,24 +26,9 @@ public class GameApplicationBuilder : GameBase
     public List<DrawDelegate> Draws { get => DrawCollection; set => DrawCollection = value; }
 
     // Создание фабрики для сущности
-    public void UseGameEnvironment<T>() where T : class, IGameEnvironment
+    public void UseGameEnvironment<T>() where T : class, IGameEnvironment, new()
     {
-        // Сущность, которому передается конструктор GameContext, не может быть создана без передачи параметра, поэтому сохраняем фабрику для создания сущности
-        if (typeof(T).GetConstructor([typeof(GameContext)]) is ConstructorInfo ctor)
-        {
-            _environmentFactories.Add(typeof(T), (context) => ctor.Invoke([context]));
-            return;
-        }
-        // Сущность с конструктором без параметров создаем и сразу регистрируем игровые функции
-        else if (typeof(T).GetConstructor(Type.EmptyTypes) is ConstructorInfo emptyCtor)
-        {
-            _environmentFactories.Add(typeof(T), _ => emptyCtor.Invoke(null));
-            return;
-        }
-        else
-        {
-            throw new Exception("Сушность должна иметь конструктор без параметров или констуктор с одним параметром GameContext.");
-        }
+        _environmentFactories.Add(typeof(T), () => new T());
     }
 
     // регистрация игровых функций сущности
@@ -61,11 +46,20 @@ public class GameApplicationBuilder : GameBase
             Services = _services.BuildServiceProvider(),
             Entities = _entitiesCollection.BuildEntityProvider()
         };
-        foreach ((Type entityType, Func<GameContext, object> factory) in _environmentFactories)
+        List<object> environments = new(_environmentFactories.Count);
+        foreach ((Type environmentType, Func<object> factory) in _environmentFactories)
         {
-            object entity = factory.Invoke(game.GameContext);
-            RegisterEnvitonmentFunctions(game, entity);
-            game.Entities.TryReleaseEntity(entityType, entity);
+            object environment = factory.Invoke();
+            RegisterEnvitonmentFunctions(game, environment);
+            game.Entities.TryReleaseEntity(environmentType, environment);
+            environments.Add(environment);
+        }
+        foreach (object environment in environments)
+        {
+            if (environment is IInitializableEnvironment initializableEnvironment)
+            {
+                initializableEnvironment.Initialize(game.GameContext);
+            }
         }
 
         return game;

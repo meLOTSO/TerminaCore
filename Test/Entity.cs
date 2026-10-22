@@ -6,7 +6,7 @@ using GameCore.Contexts;
 public class Entity : GameEnvironmentBase, IControl, IDrawable
 {
     private int _currentIndex = 0;
-    private Game _gameEntity;
+    private Game _gameEntity => GameContext.Entities.GetEntityRequired<Game>();
 
     public List<string> Menu { get; set; } = [];
     public Texture Texture { get; set; }
@@ -24,14 +24,13 @@ public class Entity : GameEnvironmentBase, IControl, IDrawable
         }
     }
 
-    public Entity(GameContext context) : base(context)
+    public Entity()
     {
         Menu = new List<string>()
         {
             "Start", "Settings", "Exit"
         };
         Texture = new(Menu);
-        _gameEntity = context.Entities.GetEntityRequired<Game>();
     }
 
     public void OnKeyPress(ControlContext controlContext)

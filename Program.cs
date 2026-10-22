@@ -9,9 +9,9 @@ gameBuilder.Entities.UseEntity<Game>();
 
 gameBuilder.Services.AddStateMachine(builder =>
 {
+    builder.AddValueForState("setting", GameScene.FromGameEnvironment<Setting>());
     builder.AddValueForState("game", GameScene.FromGameEnvironment<Game>());
     builder.AddValueForState("menu", GameScene.FromGameEnvironment<Entity>());
-    builder.AddValueForState("setting", GameScene.FromGameEnvironment<Setting>());
 });
 gameBuilder.Services.AddASCIIGraphic(40, 15);
 

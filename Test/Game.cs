@@ -10,7 +10,7 @@ public class Game : GameEnvironmentBase, IControl, IDrawable, IUpdateable
     public int SpeedX { get; set; } = 0;
     public int SpeedY { get; set; } = 0;
 
-    public Game(GameContext context) : base(context)
+    public Game()
     {
         Texture = new(@"C:\Users\MOLL\OneDrive\Документы\KAI\7 семестр\ТВП ИТС (паттерны программирования)\lab1\code\Test\texture.txt");
         Some = new Texture(

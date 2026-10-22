@@ -11,28 +11,22 @@ public class GameScene : IGameScene
     private UpdateDelegate? _update;
     private DrawDelegate? _draw;
     private OnKeyPressDelegate? _onKeyPress;
-    private KeyValuePair<Type, Func<GameContext, object>> _factoryItem;
+    private KeyValuePair<Type, Func<object>> _factoryItem;
 
     public UpdateDelegate? Update { get => _update; set => _update = value; }
     public DrawDelegate? Draw { get => _draw; set => _draw = value; }
     public OnKeyPressDelegate? OnKeyPress { get => _onKeyPress; set => _onKeyPress = value; }
-    public KeyValuePair<Type, Func<GameContext, object>> FactoryItem { get => _factoryItem; }
+    public KeyValuePair<Type, Func<object>> FactoryItem { get => _factoryItem; }
 
-    public static GameScene FromGameEnvironment<T>() where T : class, IGameEnvironment
+    public static GameScene FromGameEnvironment<T>() where T : class, IGameEnvironment, new()
     {
         var gameScene = new GameScene();
-
-        Type type = typeof(T);
-        if (type.GetConstructor([typeof(GameContext)]) is ConstructorInfo ctor)
-            gameScene.UseGameEnvironment<T>(gameContext => ctor.Invoke([gameContext]));
-        else if (type.GetConstructor(Type.EmptyTypes) is ConstructorInfo emptyCtor)
-            gameScene.UseGameEnvironment<T>(_ => emptyCtor.Invoke(null));
-
+        gameScene.UseGameEnvironment<T>(() => new T());
         return gameScene;
     }
 
-    public void UseGameEnvironment<T>(Func<GameContext, object> factory) where T : class, IGameEnvironment
+    public void UseGameEnvironment<T>(Func<object> factory) where T : class, IGameEnvironment
     {
-        _factoryItem = new KeyValuePair<Type, Func<GameContext, object>>(typeof(T), factory);
+        _factoryItem = new KeyValuePair<Type, Func<object>>(typeof(T), factory);
     }
 }

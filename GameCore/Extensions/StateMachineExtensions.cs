@@ -27,21 +27,31 @@ public static class StateMachineExtensions
 
         gameApplication.PreFrame += stateMachine.ApplyPendingState;
 
+        Dictionary<Type, object> environments = new();
         foreach (var stateValuePair in stateMachine.StateValueData)
         {
             foreach (IGameScene gameScene in stateValuePair.Value)
             {
                 Type type = gameScene.FactoryItem.Key;
-                var factory = gameScene.FactoryItem.Value;
-                object entity = factory.Invoke(gameApplication.GameContext);
 
-                if (entity is IUpdateable u) gameScene.Update = u.Update;
-                if (entity is IControl c) gameScene.OnKeyPress = c.OnKeyPress;
-                if (entity is IDrawable d) gameScene.Draw = d.Draw;
+                if (!environments.TryGetValue(type, out object? environment))
+                {
+                    environment = gameScene.FactoryItem.Value.Invoke();
+                    environments.Add(type, environment);
 
-                FileDebug.WriteLine($"UseStateMachine: TryReleaseEntity({type.Name}, {entity})");
-                gameApplication.Entities.TryReleaseEntity(type, entity);
+                    FileDebug.WriteLine($"UseStateMachine: TryReleaseEntity({type.Name}, {environment})");
+                    gameApplication.Entities.TryReleaseEntity(type, environment);
+                }
+
+                if (environment is IUpdateable u) gameScene.Update = u.Update;
+                if (environment is IControl c) gameScene.OnKeyPress = c.OnKeyPress;
+                if (environment is IDrawable d) gameScene.Draw = d.Draw;
             }
+        }
+        foreach (var environment in environments.Values)
+        {
+            if (environment is IInitializableEnvironment initializableEnvironment)
+                initializableEnvironment.Initialize(gameApplication.GameContext);
         }
 
         stateMachine.AddOnStateChangeHandler(stateContext =>
