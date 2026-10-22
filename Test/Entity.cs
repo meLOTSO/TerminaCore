@@ -44,7 +44,6 @@ public class Entity : GameEnvironmentBase, IControl, IDrawable
             switch (CurrentIndex)
             {
                 case 0:
-                    _gameEntity.Reset();
                     GameContext.SetState("game");
                     break;
                 case 1: GameContext.SetState("setting"); break;

@@ -46,6 +46,7 @@ public class GameApplicationBuilder : GameBase
             Services = _services.BuildServiceProvider(),
             Entities = _entitiesCollection.BuildEntityProvider()
         };
+
         List<object> environments = new(_environmentFactories.Count);
         foreach ((Type environmentType, Func<object> factory) in _environmentFactories)
         {
@@ -61,6 +62,15 @@ public class GameApplicationBuilder : GameBase
                 initializableEnvironment.Initialize(game.GameContext);
             }
         }
+
+        game.AfterStop += () =>
+        {
+            foreach (var env in environments)
+            {
+                if (env is IDisposable disposable)
+                    disposable.Dispose();
+            }
+        };
 
         return game;
     }

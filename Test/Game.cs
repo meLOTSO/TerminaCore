@@ -3,7 +3,7 @@ using GameCore.Extensions;
 using GameCore.Contexts;
 using Graphics;
 
-public class Game : GameEnvironmentBase, IControl, IDrawable, IUpdateable
+public class Game : GameEnvironmentBase, IControl, IDrawable, IUpdateable, IExitEnvironment
 {
     public Texture Texture { get; set; }
     public Texture Some { get; set; }
@@ -64,5 +64,10 @@ public class Game : GameEnvironmentBase, IControl, IDrawable, IUpdateable
     {
         Texture.X += SpeedX;
         Texture.Y += SpeedY;
+    }
+
+    public void OnExit()
+    {
+        Reset();
     }
 }

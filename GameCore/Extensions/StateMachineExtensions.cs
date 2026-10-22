@@ -56,6 +56,21 @@ public static class StateMachineExtensions
 
         stateMachine.AddOnStateChangeHandler(stateContext =>
         {
+            // освобождение ресурсов при смене состояния в окружениях, реализующих IExitEnvironment 
+            if (stateContext.PreviousState is not null
+                && stateMachine.StateValueData.TryGetValue(stateContext.PreviousState, out var previousScenes))
+            {
+                foreach (var scene in previousScenes)
+                {
+                    Type type = scene.FactoryItem.Key;
+                    if (environments.TryGetValue(type, out var env))
+                    {
+                        if (env is IExitEnvironment exitEnvironment)
+                            exitEnvironment.OnExit();
+                    }
+                }
+            }
+
             gameApplication.UpdateCollection.Clear();
             gameApplication.OnKeyPressCollection.Clear();
             gameApplication.DrawCollection.Clear();
@@ -67,6 +82,16 @@ public static class StateMachineExtensions
                 if (scene.Draw is DrawDelegate d) gameApplication.DrawCollection.Add(d);
             }
         });
+
+        gameApplication.AfterStop += () =>
+        {
+            foreach (var env in environments.Values)
+            {
+                if (env is IDisposable disposable)
+                    disposable.Dispose();
+            }
+            environments.Clear();
+        };
     }
 
     public static StateContext<string, IGameScene>? GetStateContext(
