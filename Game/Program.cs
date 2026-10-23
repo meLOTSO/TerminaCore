@@ -1,19 +1,24 @@
-﻿using TerminaCore.GameCore.Builder;
+﻿using TerminaCore.GameCore;
+using TerminaCore.GameCore.Builder;
 using TerminaCore.GameCore.Extensions;
 
 var builder = new GameApplicationBuilder();
 
-builder.Services.AddASCIIGraphic(40, 15);
+builder.Entities.UseEntity<Clock>();
+
+builder.Services.AddASCIIGraphic(100, 28, backgroundColor: ConsoleColor.DarkRed);
 builder.Services.AddStateMachine(builder =>
 {
-    // builder.AddValueForState();
+    builder.AddValuesForState("menu",
+        GameScene.FromGameEnvironment<Menu>(),
+        GameScene.FromGameEnvironment<Clock>());
 });
-
-// builder.Entities.UseEntity<>()
 
 var app = builder.Build();
 
 app.UseASCIIGraphic();
 app.UseStateMachine();
+
+app.SetState("menu");
 
 app.Run();

@@ -52,9 +52,10 @@ public class GameApplication : GameBase
     private void Update()
     {
         BeforeUpdate?.Invoke();
-        foreach (var u in UpdateCollection)
+        var updates = UpdateCollection;
+        for (int i = 0; i < updates.Count; i++)
         {
-            u.Invoke(UpdateContext);
+            updates[i].Invoke(UpdateContext);
         }
         AfterUpdate?.Invoke();
     }
@@ -62,16 +63,18 @@ public class GameApplication : GameBase
     private void Draw()
     {
         BeforeDraw?.Invoke();
-        foreach (var d in DrawCollection)
+        var draws = DrawCollection;
+        for (int i = 0; i < draws.Count; i++)
         {
-            d.Invoke(DrawContext);
+            draws[i].Invoke(DrawContext);
         }
         AfterDraw?.Invoke();
     }
 
     private void OnKeyPress()
     {
-        while (Console.KeyAvailable)
+        int processedKeys = 0;
+        while (Console.KeyAvailable && processedKeys < 10)
         {
             BeforeOnKeyPress?.Invoke();
             ConsoleKeyInfo key = Console.ReadKey(intercept: true);
@@ -83,6 +86,7 @@ public class GameApplication : GameBase
                 c.Invoke(ControlContext);
             }
             AfterOnKeyPress?.Invoke();
+            processedKeys++;
         }
         ControlContext.Pressed = false;
         ControlContext.Key = default;
@@ -98,26 +102,33 @@ public class GameApplication : GameBase
 
         long prevTimestamp = Stopwatch.GetTimestamp();
 
-        while (_run)
+        try
         {
-            long frameStartTimestamp = Stopwatch.GetTimestamp();
-            DeltaTimeSeconds = (float)Stopwatch.GetElapsedTime(prevTimestamp).TotalSeconds;
-            prevTimestamp = frameStartTimestamp;
+            while (_run)
+            {
+                long frameStartTimestamp = Stopwatch.GetTimestamp();
+                float rawDelta = (float)Stopwatch.GetElapsedTime(prevTimestamp).TotalSeconds;
+                DeltaTimeSeconds = Math.Clamp(rawDelta, 0.0001f, 0.1f);
+                prevTimestamp = frameStartTimestamp;
 
-            PreFrame?.Invoke();
-            OnKeyPress();
-            Update();
-            Draw();
-            AfterFrame?.Invoke();
+                PreFrame?.Invoke();
+                OnKeyPress();
+                Update();
+                Draw();
+                AfterFrame?.Invoke();
 
-            TimeSpan elapsed = Stopwatch.GetElapsedTime(frameStartTimestamp);
-            int sleepTime = TargetDeltaTimeMS - (int)elapsed.TotalMilliseconds;
+                TimeSpan elapsed = Stopwatch.GetElapsedTime(frameStartTimestamp);
+                int sleepTime = TargetDeltaTimeMS - (int)elapsed.TotalMilliseconds;
 
-            if (sleepTime > 0)
-                Thread.Sleep(sleepTime);
+                if (sleepTime > 0)
+                    Thread.Sleep(sleepTime);
+            }
         }
-
-        Console.CursorVisible = true;
+        finally
+        {
+            Console.CursorVisible = true;
+            Console.ResetColor();
+        }
     }
 
     public void Stop()

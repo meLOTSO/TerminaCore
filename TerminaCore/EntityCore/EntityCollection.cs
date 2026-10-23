@@ -13,7 +13,7 @@ public class EntityCollection : IEntityCollection
         Entities.Add(typeof(T), new EntityBag(entity, true));
     }
 
-    public void UseEntity<T>() where T : notnull
+    public void UseEntity<T>() where T : class
     {
         Entities.Add(typeof(T), new EntityBag(null, false));
     }

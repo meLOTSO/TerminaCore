@@ -28,13 +28,13 @@ public class EntityProvider : IEntityProvider
         FileDebug.Write(sb.ToString());
     }
 
-    public T? GetEntity<T>() where T : notnull
+    public T? GetEntity<T>() where T : class
     {
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null && bag.Entity is T entity) return entity;
         return default;
     }
 
-    public T GetEntityRequired<T>() where T : notnull
+    public T GetEntityRequired<T>() where T : class
     {
         FileDebug.WriteLine($"GetEntityRequired: {typeof(T).Name}.");
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null)
@@ -55,7 +55,7 @@ public class EntityProvider : IEntityProvider
         throw new Exception($"Сущность '{typeof(T).Name}' не найдена.");
     }
 
-    public bool TryReleaseEntity<T>() where T : notnull
+    public bool TryReleaseEntity<T>() where T : class
     {
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null && !bag.Released)
         {
@@ -67,7 +67,7 @@ public class EntityProvider : IEntityProvider
         return false;
     }
 
-    public bool TryReleaseEntity<T>(T entity) where T : notnull
+    public bool TryReleaseEntity<T>(T entity) where T : class
     {
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null && !bag.Released)
         {
@@ -78,13 +78,13 @@ public class EntityProvider : IEntityProvider
         return false;
     }
 
-    public bool IsNotReleasedEntity<T>() where T : notnull
+    public bool IsNotReleasedEntity<T>() where T : class
     {
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null && !bag.Released) return true;
         return false;
     }
 
-    public bool IsReleasedEntity<T>() where T : notnull
+    public bool IsReleasedEntity<T>() where T : class
     {
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null && bag.Released) return true;
         return false;
@@ -95,6 +95,8 @@ public class EntityProvider : IEntityProvider
         if (Entities.TryGetValue(entityType, out EntityBag? bag) && bag is not null && !bag.Released)
         {
             var ctor = entityType.GetConstructor(Type.EmptyTypes);
+            if (ctor is null)
+                throw new InvalidOperationException($"Тип '{entityType.Name}' не содержит публичного конструктора без параметров.");
             var entity = ctor?.Invoke(null);
             bag.Entity = entity;
             bag.Released = true;
@@ -105,6 +107,9 @@ public class EntityProvider : IEntityProvider
 
     public bool TryReleaseEntity(Type entityType, object entityObject)
     {
+        if (!entityType.IsInstanceOfType(entityObject))
+            throw new ArgumentException($"Объект типа '{entityObject.GetType().Name}' не совместим с целевым типом '{entityType.Name}'.");
+
         FileDebug.WriteLine($"TryReleaseEntity: ({entityType.Name}) {entityObject}.");
         if (Entities.TryGetValue(entityType, out EntityBag? bag) && bag is not null && !bag.Released)
         {

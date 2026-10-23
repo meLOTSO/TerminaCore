@@ -8,17 +8,13 @@ public static class GraphicExtensions
 {
     public static void AddASCIIGraphic(this IServiceCollection services,
         int width, int height, char backgroundChar = ' ',
-        ConsoleColor foregroundColor = ConsoleColor.Black, ConsoleColor backgroundColor = ConsoleColor.White)
+        ConsoleColor foregroundColor = default, ConsoleColor backgroundColor = default)
     {
         if (width < 0 || height < 0)
             throw new ArgumentException("Ширина и высота окна должны иметь положительные значения.");
 
-        Console.ForegroundColor = foregroundColor;
-        Console.BackgroundColor = backgroundColor;
-        if (OperatingSystem.IsWindows())
-            Console.SetWindowSize(width, height);
         Console.Clear();
-        services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar));
+        services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar, foregroundColor, backgroundColor));
     }
 
     public static void UseASCIIGraphic(this GameApplication gameApplication)
