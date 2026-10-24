@@ -23,7 +23,7 @@ public static class GraphicExtensions
         if (canvas is null) throw new Exception("Сервис 'Canvas' не был добавлен. Воспользуйтесь AddASCIIGraphis.");
 
         gameApplication.BeforeDraw += canvas.Clear;
-        gameApplication.AfterDraw += canvas.Render;
+        gameApplication.AfterDraw += () => canvas.Render();
         gameApplication.AfterDraw += canvas.Display;
         gameApplication.AfterFrame += canvas.Textures.Clear;
         gameApplication.AfterStop += () =>

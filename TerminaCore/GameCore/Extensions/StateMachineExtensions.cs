@@ -6,6 +6,7 @@ using TerminaCore.StateCore;
 using TerminaCore.StateCore.Builder;
 using TerminaCore.Debug;
 using TerminaCore.GameCore.Abstract;
+using TerminaCore.GameCore.Enums;
 
 namespace TerminaCore.GameCore.Extensions;
 
@@ -35,6 +36,9 @@ public static class StateMachineExtensions
             {
                 Type type = gameScene.FactoryItem.Key;
 
+                if (gameScene.FactoryItem.Value is null)
+                    throw new InvalidOperationException($"В сцене не зарегистрирована фабрика окружения (FactoryItem пуст).");
+
                 if (!environments.TryGetValue(type, out object? environment))
                 {
                     environment = gameScene.FactoryItem.Value.Invoke();
@@ -44,9 +48,9 @@ public static class StateMachineExtensions
                     gameApplication.Entities.TryReleaseEntity(type, environment);
                 }
 
-                if (environment is IUpdateable u) gameScene.Update = u.Update;
-                if (environment is IControl c) gameScene.OnKeyPress = c.OnKeyPress;
-                if (environment is IDrawable d) gameScene.Draw = d.Draw;
+                if (gameScene.GameFunctions.HasFlag(GameFunctions.Update) && environment is IUpdateable u) gameScene.Update = u.Update;
+                if (gameScene.GameFunctions.HasFlag(GameFunctions.OnKeyPress) && environment is IControl c) gameScene.OnKeyPress = c.OnKeyPress;
+                if (gameScene.GameFunctions.HasFlag(GameFunctions.Draw) && environment is IDrawable d) gameScene.Draw = d.Draw;
             }
         }
         foreach (var environment in environments.Values)

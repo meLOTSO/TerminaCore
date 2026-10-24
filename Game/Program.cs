@@ -1,5 +1,6 @@
 ﻿using TerminaCore.GameCore;
 using TerminaCore.GameCore.Builder;
+using TerminaCore.GameCore.Enums;
 using TerminaCore.GameCore.Extensions;
 
 var builder = new GameApplicationBuilder();

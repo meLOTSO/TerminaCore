@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TerminaCore.GameCore.Abstract;
 using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Delegates;
+using TerminaCore.GameCore.Enums;
 
 namespace TerminaCore.GameCore;
 
@@ -18,10 +19,13 @@ public class GameScene : IGameScene
     public OnKeyPressDelegate? OnKeyPress { get => _onKeyPress; set => _onKeyPress = value; }
     public KeyValuePair<Type, Func<object>> FactoryItem { get => _factoryItem; }
 
-    public static GameScene FromGameEnvironment<T>() where T : class, IGameEnvironment, new()
+    public GameFunctions GameFunctions { get; set; } = GameFunctions.All;
+
+    public static GameScene FromGameEnvironment<T>(GameFunctions gameFunctions = GameFunctions.All) where T : class, IGameEnvironment, new()
     {
         var gameScene = new GameScene();
         gameScene.UseGameEnvironment<T>(() => new T());
+        gameScene.GameFunctions = gameFunctions;
         return gameScene;
     }
 

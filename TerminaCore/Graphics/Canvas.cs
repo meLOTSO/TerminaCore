@@ -6,7 +6,7 @@ namespace TerminaCore.Graphics;
 public class Canvas
 {
     private readonly Texture _initialState;
-    private readonly Texture _renderCanvas;
+    private Texture _renderCanvas;
 
     // Буферы цветов для каждой ячейки холста
     private readonly ConsoleColor?[] _fgColorBuffer;
@@ -20,6 +20,7 @@ public class Canvas
     public int Height => _renderCanvas.Height;
 
     public List<Texture> Textures { get; set; } = [];
+    public Texture RenderTexture { get => _renderCanvas; set => _renderCanvas = value; }
 
     public Canvas(int width, int height, char backgroundChar = ' ',
                   ConsoleColor defaultFg = ConsoleColor.White, ConsoleColor defaultBg = ConsoleColor.Black)
@@ -61,7 +62,7 @@ public class Canvas
         Textures.Clear();
     }
 
-    public void Render()
+    public Texture Render()
     {
         // Сортировка текстур по ZIndex перед отрисовкой
         Textures.Sort();
@@ -110,6 +111,7 @@ public class Canvas
                 }
             }
         }
+        return _renderCanvas;
     }
 
     public void Display()
