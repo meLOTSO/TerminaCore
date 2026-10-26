@@ -5,7 +5,7 @@ public class Select
     private bool _selected = false;
 
     public Texture Texture { get; private set; }
-    public string Text { get; private set; }
+    public string Text { get; set; }
     public event Action<Select>? OnSelectOn;
     public event Action<Select>? OnSelectOut;
     public event Action<Select>? OnInput;

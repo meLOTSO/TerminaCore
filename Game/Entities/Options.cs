@@ -3,6 +3,7 @@ using TerminaCore.Graphics;
 public class Options
 {
     private Canvas _canvas;
+    private Action<int, Select>? _selectConfigurator;
 
     public List<Select> Selects { get; private set; } = [];
     public event Action<Select>? OnSelectOn;
@@ -19,10 +20,19 @@ public class Options
     {
         for (int i = 0; i < Selects.Count; i++)
         {
-            Selects[i].Texture.Y = i;
+            // Selects[i].Texture.Y = i;
             _canvas.Draw(Selects[i].Texture);
         }
         return _canvas.Render();
+    }
+
+    public void ConfigureSelect(Action<int, Select> selectConfiguration)
+    {
+        _selectConfigurator = selectConfiguration;
+        for (int i = 0; i < Selects.Count; i++)
+        {
+            _selectConfigurator.Invoke(i, Selects[i]);
+        }
     }
 
     public void AddSelect(Select select,
@@ -31,6 +41,8 @@ public class Options
         Action<Select>? onSelectOff = null,
         bool isSelected = false)
     {
+        _selectConfigurator?.Invoke(Count, select);
+
         select.OnInput += (sel) => OnSelectInput?.Invoke(sel);
         select.OnSelectOn += (sel) => OnSelectOn?.Invoke(sel);
         select.OnSelectOut += (sel) => OnSelectOut?.Invoke(sel);
