@@ -1,4 +1,4 @@
-namespace TerminaCore.Graphics.DOM.Style;
+namespace TerminaCore.DOMCore.Style;
 
 public struct ModelNodeStyleOptions
 {
@@ -8,4 +8,6 @@ public struct ModelNodeStyleOptions
     public int ByDisplayStrideY { get; set; }
     public int ByFlexX { get; set; }
     public int ByFlexY { get; set; }
+    public int ByGridX { get; set; }
+    public int ByGridY { get; set; }
 }

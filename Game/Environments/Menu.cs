@@ -67,10 +67,10 @@ public class Menu : GameEnvironmentBase, IDrawable, IControl
     {
         base.Initialize(context);
 
-        int width = context.GetCanvasWidth();
-        int height = context.GetCanvasHeight();
+        // int width = context.GetCanvasWidth();
+        // int height = context.GetCanvasHeight();
 
-        Style.ToPosition(MenuOptions.GetTexture(), width, height, Position.Center, Position.Center);
+        Style.ToPosition(MenuOptions.GetTexture(), context.GetCanvas()?.RenderTexture!, Position.Center, Position.Center);
         MenuOptions.GetTexture().Y += 5;
 
         MenuOptions.ConfigureSelect((int index, Select select) =>

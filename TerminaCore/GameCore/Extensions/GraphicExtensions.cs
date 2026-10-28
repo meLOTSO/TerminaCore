@@ -6,7 +6,7 @@ namespace TerminaCore.GameCore.Extensions;
 
 public static class GraphicExtensions
 {
-    public static void AddASCIIGraphic(this IServiceCollection services,
+    public static Canvas AddASCIIGraphic(this IServiceCollection services,
         int width, int height, char backgroundChar = ' ',
         ConsoleColor foregroundColor = default, ConsoleColor backgroundColor = default)
     {
@@ -14,13 +14,14 @@ public static class GraphicExtensions
             throw new ArgumentException("Ширина и высота окна должны иметь положительные значения.");
 
         Console.Clear();
-        services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar, foregroundColor, backgroundColor));
+        var canvas = new Canvas(width, height, backgroundChar, foregroundColor, backgroundColor);
+        services.AddSingleton<Canvas>(canvas);
+        return canvas;
     }
 
-    public static void UseASCIIGraphic(this GameApplication gameApplication)
+    public static GameApplication UseASCIIGraphic(this GameApplication gameApplication)
     {
-        Canvas? canvas = gameApplication.Services.GetService<Canvas>();
-        if (canvas is null) throw new Exception("Сервис 'Canvas' не был добавлен. Воспользуйтесь AddASCIIGraphis.");
+        Canvas? canvas = gameApplication.Services.GetService<Canvas>() ?? throw new Exception("Сервис 'Canvas' не был добавлен. Воспользуйтесь AddASCIIGraphis.");
 
         gameApplication.BeforeDraw += canvas.Clear;
         gameApplication.AfterDraw += () => canvas.Render();
@@ -31,6 +32,7 @@ public static class GraphicExtensions
             Console.ResetColor();
             Console.CursorVisible = true;
         };
+        return gameApplication;
     }
 
     public static void Draw(this DrawContext context, Texture texture)
@@ -51,6 +53,10 @@ public static class GraphicExtensions
         if (canvas is null) return 0;
         return canvas.Height;
     }
+    public static Canvas? GetCanvas(this GameContext context)
+    {
+        return context.Services.GetService<Canvas>();
+    }
     public static int GetCanvasWidth(this DrawContext context)
     {
         Canvas? canvas = context.Services.GetService<Canvas>();
@@ -62,5 +68,9 @@ public static class GraphicExtensions
         Canvas? canvas = context.Services.GetService<Canvas>();
         if (canvas is null) return 0;
         return canvas.Height;
+    }
+    public static Canvas? GetCanvas(this DrawContext context)
+    {
+        return context.Services.GetService<Canvas>();
     }
 }

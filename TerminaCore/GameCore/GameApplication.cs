@@ -32,6 +32,8 @@ public class GameApplication : GameBase
     public event Action? AfterUpdate;
     public event Action? BeforeOnKeyPress;
     public event Action? AfterOnKeyPress;
+    public event Action? BeforeRun;
+    public event Action? AfterRun;
     public event Action? BeforeStop;
     public event Action? AfterStop;
 
@@ -102,6 +104,8 @@ public class GameApplication : GameBase
 
         long prevTimestamp = Stopwatch.GetTimestamp();
 
+        BeforeRun?.Invoke();
+
         try
         {
             while (_run)
@@ -126,6 +130,7 @@ public class GameApplication : GameBase
         }
         finally
         {
+            AfterRun?.Invoke();
             Console.CursorVisible = true;
             Console.ResetColor();
         }

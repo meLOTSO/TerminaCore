@@ -1,18 +1,22 @@
-namespace TerminaCore.Graphics.DOM;
+using TerminaCore.Graphics;
+
+namespace TerminaCore.DOMCore;
 
 public class ModelTree
 {
     private readonly Canvas _canvas;
     public ModelNode Body { get; set; }
 
-    public ModelTree(Canvas canvas, string? id = null, string? className = null)
+    public ModelTree(Canvas canvas, string? className = null)
     {
         _canvas = canvas;
-        Body = new ModelNode(_canvas.RenderTexture, id: id, className: className);
+        Body = new ModelNode(_canvas.RenderTexture, id: "body", className: className);
     }
 
-    public ModelNode? GetNodeById(string id) => Body.FirstChild((node) => node.Id == id);
-    public static ModelNode? GetNodeById(string id, ModelNode node) => ModelNode.FirstChild((node) => node.Id == id, node);
+    public ModelNode? GetNodeById(string id) => First((node) => node.Id == id);
+    public static ModelNode? GetNodeById(string id, ModelTree tree) => ModelTree.First((node) => node.Id == id, tree.Body);
+    public List<ModelNode> GetNodeByClass(string className) => Where((node) => node.ClassName == className);
+    public static List<ModelNode> GetNodeByClass(string className, ModelTree tree) => ModelTree.Where((node) => node.ClassName == className, tree.Body);
 
     public List<ModelNode> Where(Predicate<ModelNode> predicate) => Body.ChildsWhere(predicate);
     public static List<ModelNode> Where(Predicate<ModelNode> predicate, ModelNode node) => ModelNode.ChildsWhere(predicate, node);
@@ -25,4 +29,19 @@ public class ModelTree
 
     public List<T> Select<T>(Func<ModelNode, T> func) => Body.SelectChilds<T>(func);
     public static List<T> Select<T>(Func<ModelNode, T> func, ModelNode node) => ModelNode.SelectChilds<T>(func, node);
+
+    public void Update()
+    {
+        Queue<ModelNode> queue = new();
+        queue.Enqueue(Body);
+
+        while (queue.TryDequeue(out ModelNode? node))
+        {
+            node.Update();
+            foreach (var child in node.Childs)
+            {
+                queue.Enqueue(child);
+            }
+        }
+    }
 }

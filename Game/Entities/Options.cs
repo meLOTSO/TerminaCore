@@ -13,14 +13,14 @@ public class Options
 
     public Options(int width, int height, char backgroundChar = ' ', ConsoleColor defaultFg = default, ConsoleColor defaultBg = default)
     {
-        _canvas = new Canvas(height, width, backgroundChar, defaultFg, defaultBg);
+        _canvas = new Canvas(width, height, backgroundChar, defaultFg, defaultBg);
     }
 
     public Texture GetTexture()
     {
+        _canvas.Clear();
         for (int i = 0; i < Selects.Count; i++)
         {
-            // Selects[i].Texture.Y = i;
             _canvas.Draw(Selects[i].Texture);
         }
         return _canvas.Render();

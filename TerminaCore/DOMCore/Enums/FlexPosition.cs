@@ -1,4 +1,4 @@
-namespace TerminaCore.Graphics.DOM.Enums;
+namespace TerminaCore.DOMCore.Enums;
 
 public enum FlexPosition
 {

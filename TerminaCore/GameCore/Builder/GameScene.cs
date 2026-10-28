@@ -5,7 +5,7 @@ using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Delegates;
 using TerminaCore.GameCore.Enums;
 
-namespace TerminaCore.GameCore;
+namespace TerminaCore.GameCore.Builder;
 
 public class GameScene : IGameScene
 {
