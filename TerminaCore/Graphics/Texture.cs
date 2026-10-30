@@ -14,6 +14,7 @@ public class Texture : IComparable<Texture>
     public int Y { get; set; }
     public int ZIndex { get; set; }
     public HashSet<char> IgnoreSet { get; set; } = [' ', '\0'];
+    public object? Tag { get; set; }
 
     public ConsoleColor? ForegroundColor { get; set; } = null;
     public ConsoleColor? BackgroundColor { get; set; } = null;

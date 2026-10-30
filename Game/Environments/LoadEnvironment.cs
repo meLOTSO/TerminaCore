@@ -1,9 +1,9 @@
 using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Contexts;
 
-public class Load : GameEnvironmentBase, IControl, IDrawable
+public class LoadEnvironment : GameEnvironmentBase, IControl, IDrawable
 {
-    public Load()
+    public LoadEnvironment()
     {
 
     }

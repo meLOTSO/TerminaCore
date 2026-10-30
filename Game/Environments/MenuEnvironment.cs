@@ -6,7 +6,7 @@ using TerminaCore.GameCore.Contexts;
 using TerminaCore.GameCore.Extensions;
 using TerminaCore.Graphics;
 
-public class Menu : GameEnvironmentBase, IDrawable, IControl
+public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 {
     public Options MenuOptions { get; }
 
@@ -22,7 +22,7 @@ public class Menu : GameEnvironmentBase, IDrawable, IControl
         }
     }
 
-    public Menu()
+    public MenuEnvironment()
     {
         MenuOptions = new(12, 3);
     }

@@ -3,14 +3,14 @@ using TerminaCore.GameCore.Contexts;
 using TerminaCore.GameCore.Extensions;
 using TerminaCore.Graphics;
 
-public class Clock : GameEnvironmentBase, IDrawable, IUpdateable
+public class ClockEnvironment : GameEnvironmentBase, IDrawable, IUpdateable
 {
     private readonly Nums _nums;
 
     public Texture[] ClockNums { get; private set; } = new Texture[6];
     public Texture ClockTexture { get; private set; } = new Texture(4, 4 * 6 + 3 + 2 * 3);
 
-    public Clock()
+    public ClockEnvironment()
     {
         _nums = new Nums();
         for (int i = 0; i < _nums.NumberTextures.Length; i++)

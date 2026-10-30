@@ -26,7 +26,6 @@ public static class GraphicExtensions
         gameApplication.BeforeDraw += canvas.Clear;
         gameApplication.AfterDraw += () => canvas.Render();
         gameApplication.AfterDraw += canvas.Display;
-        gameApplication.AfterFrame += canvas.Textures.Clear;
         gameApplication.AfterStop += () =>
         {
             Console.ResetColor();
@@ -57,6 +56,10 @@ public static class GraphicExtensions
     {
         return context.Services.GetService<Canvas>();
     }
+    public static Canvas GetCanvasRequired(this GameContext context)
+    {
+        return context.Services.GetServiceRequired<Canvas>();
+    }
     public static int GetCanvasWidth(this DrawContext context)
     {
         Canvas? canvas = context.Services.GetService<Canvas>();
@@ -72,5 +75,9 @@ public static class GraphicExtensions
     public static Canvas? GetCanvas(this DrawContext context)
     {
         return context.Services.GetService<Canvas>();
+    }
+    public static Canvas GetCanvasRequired(this DrawContext context)
+    {
+        return context.Services.GetServiceRequired<Canvas>();
     }
 }

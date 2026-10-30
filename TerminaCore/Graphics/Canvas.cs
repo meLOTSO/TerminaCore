@@ -37,6 +37,39 @@ public class Canvas
         _bgColorBuffer = new ConsoleColor?[totalCells];
     }
 
+    public IEnumerable<Texture> TexturesWhere(Predicate<Texture> predicate)
+    {
+        foreach (var t in Textures)
+        {
+            if (predicate.Invoke(t)) yield return t;
+        }
+    }
+
+    public Texture? FirstTexture(Predicate<Texture> predicate)
+    {
+        foreach (var t in Textures)
+        {
+            if (predicate.Invoke(t)) return t;
+        }
+        return null;
+    }
+    public Texture? LastTexture(Predicate<Texture> predicate)
+    {
+        var textures = Textures;
+        for (int i = textures.Count - 1; i >= 0; i--)
+        {
+            if (predicate.Invoke(textures[i])) return textures[i];
+        }
+        return null;
+    }
+    public IEnumerable<T> SelectTextures<T>(Func<Texture, T> func)
+    {
+        foreach (var t in Textures)
+        {
+            yield return func.Invoke(t);
+        }
+    }
+
     public void Draw(Texture texture)
     {
         if (texture is not null)
@@ -58,7 +91,6 @@ public class Canvas
         Array.Clear(_fgColorBuffer, 0, _fgColorBuffer.Length);
         Array.Clear(_bgColorBuffer, 0, _bgColorBuffer.Length);
 
-        // Предотвращаем бесконечное разрастание списка в цикле кадров
         Textures.Clear();
     }
 
