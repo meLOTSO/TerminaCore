@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using TerminaCore.Graphics;
 
 namespace TerminaCore.DOMCore.Abstract;
@@ -15,33 +17,34 @@ public abstract class ModelNodeBase<T> where T : ModelNodeBase<T>
     public T? PrevNode => (Index > 0 && Parent is not null) ? Parent.Childs[Index - 1] : null;
     public T? NextNode => (Index >= 0 && Parent is not null && Index + 1 < Parent.Childs.Count) ? Parent.Childs[Index + 1] : null;
     public string? ClassName { get; set; }
+
     public string? Id
     {
         get => _id;
         set
         {
-            if (value is null) return;
-            T? body = null;
-            Queue<T> queue = new();
-            queue.Enqueue((T)this);
-            while (queue.TryDequeue(out T? item) && item is not null)
+            if (value is null)
             {
-                if (item.Id == value) throw new Exception("Идентификатор должен быть уникальным.");
-                else if (item.Id == "body")
-                {
-                    body = item;
-                    break;
-                }
-                queue.Enqueue(item.Parent!);
+                _id = null;
+                return;
             }
-            Queue<T> q = new();
-            q.Enqueue(body!);
-            while (q.TryDequeue(out T? item) && item is not null)
+
+            T root = (T)this;
+            while (root.Parent is not null)
             {
-                if (item.Id == value) throw new Exception("Идентификатор должен быть уникальным.");
+                root = root.Parent;
+            }
+
+            Queue<T> queue = new();
+            queue.Enqueue(root);
+            while (queue.TryDequeue(out T? item))
+            {
+                if (!ReferenceEquals(item, this) && item.Id == value)
+                    throw new InvalidOperationException($"Идентификатор '{value}' уже используется в DOM-дереве.");
+
                 foreach (var child in item.Childs)
                 {
-                    q.Enqueue(child);
+                    queue.Enqueue(child);
                 }
             }
             _id = value;
@@ -63,14 +66,18 @@ public abstract class ModelNodeBase<T> where T : ModelNodeBase<T>
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        if (node == this) throw new ArgumentException("Объект не может быть дочерним для самого себя.");
-        if (node.Parent == this && _childs.Contains(node)) return;
+        if (ReferenceEquals(node, this))
+            throw new ArgumentException("Объект не может быть дочерним для самого себя.");
+
+        if (node.Parent == this && _childs.Contains(node))
+            return;
 
         node.Parent?.RemoveChild(node);
 
         node.Parent = (T)this;
         _childs.Add(node);
     }
+
     public virtual bool RemoveChild(T node)
     {
         ArgumentNullException.ThrowIfNull(node);

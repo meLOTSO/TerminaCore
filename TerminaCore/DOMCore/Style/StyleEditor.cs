@@ -1,6 +1,6 @@
 namespace TerminaCore.DOMCore.Style;
 
-public struct ModelNodeStyleOptions
+public struct StyleEditor
 {
     public int ByPositionStrideX { get; set; }
     public int ByPositionStrideY { get; set; }

@@ -7,6 +7,7 @@ using TerminaCore.StateCore.Builder;
 using TerminaCore.Debug;
 using TerminaCore.GameCore.Abstract;
 using TerminaCore.GameCore.Enums;
+using TerminaCore.StateCore.Delegates;
 
 namespace TerminaCore.GameCore.Extensions;
 
@@ -18,8 +19,7 @@ public static class StateMachineExtensions
     {
         var builder = new StateMachineBuilder<string, IGameScene>();
         configure(builder);
-        var sm = builder.Build();
-        services.AddSingleton<StateMachine<string, IGameScene>>(sm);
+        services.AddSingleton<StateMachine<string, IGameScene>>(() => builder.Build());
     }
 
     public static void UseStateMachine(this GameApplication gameApplication)
@@ -59,7 +59,7 @@ public static class StateMachineExtensions
                 initializableEnvironment.Initialize(gameApplication.GameContext);
         }
 
-        stateMachine.AddOnStateChangeHandler(stateContext =>
+        stateMachine.AddOnStateChangedHandler(stateContext =>
         {
             // освобождение ресурсов при смене состояния в окружениях, реализующих IExitEnvironment 
             if (stateContext.PreviousState is not null
@@ -123,5 +123,12 @@ public static class StateMachineExtensions
     {
         var stateContext = gameApplication.Services.GetStateContext();
         stateContext?.SetState(state, true);
+    }
+
+    public static void AddOnStateChangedHandler(this GameContext context, StateChangedDelegate<string, IGameScene> handler)
+    {
+        var sm = context.Services.GetService<StateMachine<string, IGameScene>>();
+        if (sm is null) return;
+        sm.AddOnStateChangedHandler(handler);
     }
 }

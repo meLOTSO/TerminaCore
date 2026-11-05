@@ -7,7 +7,7 @@ namespace TerminaCore.Graphics;
 
 public class Texture : IComparable<Texture>
 {
-    public char[] Buffer { get; set; } = [];
+    public char[] Buffer { get; private set; } = [];
     public int Width { get; private set; }
     public int Height { get; private set; }
     public int X { get; set; }
@@ -31,19 +31,27 @@ public class Texture : IComparable<Texture>
     public Texture(string buffer, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
         => SetTexture(buffer, foregroundColor, backgroundColor);
 
-    public Texture(int height, int width, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
-        => SetTexture(height, width, foregroundColor, backgroundColor);
+    public Texture(int width, int height, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+        => SetTexture(width, height, foregroundColor, backgroundColor);
 
-    public Texture(int height, int width, char symbol, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
-        => SetTexture(height, width, symbol, foregroundColor, backgroundColor);
+    public Texture(int width, int height, char symbol, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+        => SetTexture(width, height, symbol, foregroundColor, backgroundColor);
 
-    private Texture(char[] buffer, int height, int width, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
-        => SetTexture(buffer, height, width, foregroundColor, backgroundColor);
+    private Texture(char[] buffer, int width, int height, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+        => SetTextureInternal(buffer, width, height, foregroundColor, backgroundColor);
 
     public void SetTexture(char[,] texture, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
     {
         Height = texture.GetLength(0);
         Width = texture.GetLength(1);
+
+        if (Height == 0 || Width == 0)
+        {
+            Buffer = [];
+            SetColor(foregroundColor, backgroundColor);
+            return;
+        }
+
         Buffer = new char[Height * (Width + 1)];
         for (int i = 0; i < Height; i++)
         {
@@ -72,7 +80,9 @@ public class Texture : IComparable<Texture>
 
     public void SetTexture(List<string> texture, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
     {
-        var res = Texture.From(texture, texture.Count, texture.Count > 0 ? texture.Max(str => str.Length) : 0);
+        int h = texture.Count;
+        int w = h > 0 ? texture.Max(str => str.Length) : 0;
+        var res = Texture.From(texture, w, h);
         Buffer = res.Buffer;
         Height = res.Height;
         Width = res.Width;
@@ -84,26 +94,26 @@ public class Texture : IComparable<Texture>
         if (Path.GetExtension(path) != ".txt")
             throw new ArgumentException("Файл должен быть формата .txt", nameof(path));
 
-        List<string> data = new();
+        List<string> data = [];
         int maxWidth = 0;
         using (var textReader = new StreamReader(path))
         {
             string? line;
             while ((line = textReader.ReadLine()) is not null)
             {
-                string value = line.TrimEnd();
+                string value = line.TrimEnd('\r', '\n').Replace("\t", "    ");
                 data.Add(value);
                 maxWidth = Math.Max(maxWidth, value.Length);
             }
         }
-        var res = Texture.From(data, data.Count, maxWidth);
+        var res = Texture.From(data, maxWidth, data.Count);
         Buffer = res.Buffer;
         Height = res.Height;
         Width = res.Width;
         SetColor(foregroundColor, backgroundColor);
     }
 
-    public void SetTexture(int height, int width, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+    public void SetTexture(int width, int height, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
     {
         Height = height;
         Width = width;
@@ -118,9 +128,9 @@ public class Texture : IComparable<Texture>
         SetColor(foregroundColor, backgroundColor);
     }
 
-    public void SetTexture(int height, int width, char symbol, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+    public void SetTexture(int width, int height, char symbol, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
     {
-        SetTexture(height, width, foregroundColor, backgroundColor);
+        SetTexture(width, height, foregroundColor, backgroundColor);
         for (int i = 0; i < height; i++)
         {
             int rowOffset = i * (width + 1);
@@ -129,7 +139,7 @@ public class Texture : IComparable<Texture>
         }
     }
 
-    private void SetTexture(char[] buffer, int height, int width, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
+    private void SetTextureInternal(char[] buffer, int width, int height, ConsoleColor? foregroundColor = null, ConsoleColor? backgroundColor = null)
     {
         Height = height;
         Width = width;
@@ -228,7 +238,7 @@ public class Texture : IComparable<Texture>
             for (int col = 0; col < copyWidth; col++)
             {
                 char symbol = srcRow[col];
-                if (symbol != '\0' && !texture.IgnoreSet.Contains(symbol))
+                if (!texture.IsIgnoreSymbol(symbol))
                 {
                     dstRow[col] = symbol;
                 }
@@ -246,75 +256,83 @@ public class Texture : IComparable<Texture>
         ArgumentNullException.ThrowIfNull(mainTexture);
         ArgumentNullException.ThrowIfNull(textureToJoin);
 
-        int newWidth = Math.Max(mainTexture.Width, textureToJoin.Width + x);
-        int newHeight = Math.Max(mainTexture.Height, textureToJoin.Height + y);
+        int minX = Math.Min(0, x);
+        int minY = Math.Min(0, y);
+        int maxX = Math.Max(mainTexture.Width, x + textureToJoin.Width);
+        int maxY = Math.Max(mainTexture.Height, y + textureToJoin.Height);
+
+        int newWidth = maxX - minX;
+        int newHeight = maxY - minY;
 
         if (newWidth == mainTexture.Width && newHeight == mainTexture.Height && x >= 0 && y >= 0)
         {
             return mainTexture.Join(textureToJoin, x, y, slicer: true);
         }
 
-        var result = new Texture(newHeight, newWidth, mainTexture.ForegroundColor, mainTexture.BackgroundColor);
-        Span<char> dstBuffer = result.Buffer.AsSpan();
-        int dstStride = newWidth + 1;
+        var result = new Texture(newWidth, newHeight, ' ', mainTexture.ForegroundColor, mainTexture.BackgroundColor);
 
-        ReadOnlySpan<char> mainBuffer = mainTexture.Buffer.AsSpan();
-        int mainStride = mainTexture.Width + 1;
-        for (int row = 0; row < mainTexture.Height; row++)
-        {
-            ReadOnlySpan<char> srcRow = mainBuffer.Slice(row * mainStride, mainTexture.Width);
-            Span<char> dstRow = dstBuffer.Slice(row * dstStride, mainTexture.Width);
-            srcRow.CopyTo(dstRow);
-        }
+        int mainOffsetX = -minX;
+        int mainOffsetY = -minY;
+        CopySpanToBuffer(result, mainTexture, mainOffsetX, mainOffsetY);
 
-        ReadOnlySpan<char> joinBuffer = textureToJoin.Buffer.AsSpan();
-        int joinStride = textureToJoin.Width + 1;
-
-        int startY = Math.Max(0, y);
-        int endY = Math.Min(newHeight, y + textureToJoin.Height);
-        int startX = Math.Max(0, x);
-        int endX = Math.Min(newWidth, x + textureToJoin.Width);
-        int copyWidth = endX - startX;
-
-        if (copyWidth > 0)
-        {
-            for (int rowY = startY; rowY < endY; rowY++)
-            {
-                int srcLocalY = rowY - y;
-                int srcLocalX = startX - x;
-
-                ReadOnlySpan<char> srcRow = joinBuffer.Slice(srcLocalY * joinStride + srcLocalX, copyWidth);
-                Span<char> dstRow = dstBuffer.Slice(rowY * dstStride + startX, copyWidth);
-
-                for (int col = 0; col < copyWidth; col++)
-                {
-                    char symbol = srcRow[col];
-                    if (symbol != '\0' && !textureToJoin.IgnoreSet.Contains(symbol))
-                    {
-                        dstRow[col] = symbol;
-                    }
-                }
-            }
-        }
+        int joinOffsetX = x - minX;
+        int joinOffsetY = y - minY;
+        CopySpanToBuffer(result, textureToJoin, joinOffsetX, joinOffsetY);
 
         return result;
     }
 
-    public static Texture From(List<string> texture, int height, int width)
+    private static void CopySpanToBuffer(Texture dst, Texture src, int offsetX, int offsetY)
+    {
+        int startY = Math.Max(0, offsetY);
+        int endY = Math.Min(dst.Height, offsetY + src.Height);
+
+        int startX = Math.Max(0, offsetX);
+        int endX = Math.Min(dst.Width, offsetX + src.Width);
+
+        if (startX >= endX || startY >= endY) return;
+
+        Span<char> dstBuffer = dst.Buffer.AsSpan();
+        ReadOnlySpan<char> srcBuffer = src.Buffer.AsSpan();
+
+        int dstStride = dst.Width + 1;
+        int srcStride = src.Width + 1;
+        int copyWidth = endX - startX;
+
+        for (int rowY = startY; rowY < endY; rowY++)
+        {
+            int srcLocalY = rowY - offsetY;
+            int srcLocalX = startX - offsetX;
+
+            Span<char> dstRow = dstBuffer.Slice(rowY * dstStride + startX, copyWidth);
+            ReadOnlySpan<char> srcRow = srcBuffer.Slice(srcLocalY * srcStride + srcLocalX, copyWidth);
+
+            for (int col = 0; col < copyWidth; col++)
+            {
+                char symbol = srcRow[col];
+                if (!src.IsIgnoreSymbol(symbol))
+                {
+                    dstRow[col] = symbol;
+                }
+            }
+        }
+    }
+
+    public static Texture From(List<string> texture, int width, int height)
     {
         char[] buffer = new char[height * (width + 1)];
-        int j;
         for (int i = 0; i < height; i++)
         {
-            string line = texture[i];
+            string line = i < texture.Count ? texture[i] : string.Empty;
             int rowOffset = i * (width + 1);
-            for (j = 0; j < line.Length; j++)
+            int j = 0;
+            for (; j < line.Length && j < width; j++)
                 buffer[rowOffset + j] = line[j];
             for (; j < width; j++)
                 buffer[rowOffset + j] = ' ';
             buffer[rowOffset + width] = '\n';
         }
-        return new Texture(buffer, height, width);
+        return new Texture(buffer, width, height);
     }
 
     public void DisplayInColumn() => Console.WriteLine(Buffer);
@@ -387,11 +405,12 @@ public class Texture : IComparable<Texture>
         return false;
     }
 
-    public Texture Copy() => new Texture((char[])Buffer.Clone(), Height, Width, ForegroundColor, BackgroundColor)
+    public Texture Copy() => new Texture((char[])Buffer.Clone(), Width, Height, ForegroundColor, BackgroundColor)
     {
         X = this.X,
         Y = this.Y,
         ZIndex = this.ZIndex,
+        Tag = this.Tag,
         IgnoreSet = new HashSet<char>(this.IgnoreSet)
     };
 

@@ -6,7 +6,7 @@ using TerminaCore.GameCore.Contexts;
 using TerminaCore.GameCore.Extensions;
 using TerminaCore.Graphics;
 
-namespace Game.Environments;
+namespace Game.Environments.DisplayInteractive;
 
 public class CursorEnvironment : GameEnvironmentBase, IUpdateable, IDrawable, IControl, IExitEnvironment
 {
@@ -141,12 +141,12 @@ public class CursorEnvironment : GameEnvironmentBase, IUpdateable, IDrawable, IC
             if (t != _mouseMovedOn)
             {
                 _mouseMovedOn = mouseMove;
-                mouseMove.MouseIn();
+                mouseMove.FocusIn();
             }
         }
         else if (_mouseMovedOn is not null)
         {
-            _mouseMovedOn.MouseOut();
+            _mouseMovedOn.FocusOut();
             _mouseMovedOn = null;
         }
     }

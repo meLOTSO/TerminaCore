@@ -34,8 +34,10 @@ public class EntityProvider : IEntityProvider
         return default;
     }
 
-    public T GetEntityRequired<T>() where T : class
+    public T GetEntityRequired<T>(bool tryRelease = true) where T : class
     {
+        if (tryRelease) TryReleaseEntity<T>();
+
         FileDebug.WriteLine($"GetEntityRequired: {typeof(T).Name}.");
         if (Entities.TryGetValue(typeof(T), out EntityBag? bag) && bag is not null)
         {

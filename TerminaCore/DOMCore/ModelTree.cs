@@ -32,16 +32,6 @@ public class ModelTree
 
     public void Update()
     {
-        Queue<ModelNode> queue = new();
-        queue.Enqueue(Body);
-
-        while (queue.TryDequeue(out ModelNode? node))
-        {
-            node.Update();
-            foreach (var child in node.Childs)
-            {
-                queue.Enqueue(child);
-            }
-        }
+        Body.UpdateStyleBFS();
     }
 }

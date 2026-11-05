@@ -1,6 +1,6 @@
 namespace TerminaCore.ServiceCore.Enums;
 
-public enum ServiceRuntime
+public enum ServiceLifetime
 {
     Singleton,
     Transient

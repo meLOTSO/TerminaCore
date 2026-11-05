@@ -6,7 +6,7 @@ namespace TerminaCore.GameCore.Extensions;
 
 public static class GraphicExtensions
 {
-    public static Canvas AddASCIIGraphic(this IServiceCollection services,
+    public static IServiceCollection AddASCIIGraphic(this IServiceCollection services,
         int width, int height, char backgroundChar = ' ',
         ConsoleColor foregroundColor = default, ConsoleColor backgroundColor = default)
     {
@@ -14,9 +14,8 @@ public static class GraphicExtensions
             throw new ArgumentException("Ширина и высота окна должны иметь положительные значения.");
 
         Console.Clear();
-        var canvas = new Canvas(width, height, backgroundChar, foregroundColor, backgroundColor);
-        services.AddSingleton<Canvas>(canvas);
-        return canvas;
+        services.AddSingleton<Canvas>(() => new Canvas(width, height, backgroundChar, foregroundColor, backgroundColor));
+        return services;
     }
 
     public static GameApplication UseASCIIGraphic(this GameApplication gameApplication)

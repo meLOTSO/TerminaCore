@@ -1,15 +1,14 @@
 using TerminaCore.Graphics;
-
+using Game.Display.Abstract;
 
 namespace Game.Display;
 
-public class Button : Game.Display.Abstract.IClickable, Game.Display.Abstract.IMouseMoveReactable
+public class Button : IClickable, IMouseMoveReactable
 {
     public Texture Texture { get; set; }
-    public event Action? OnMouseIn;
-    public event Action? OnMouseOut;
+    public event Action? OnFocusIn;
+    public event Action? OnFocusOut;
     public event Action? OnMouseMove;
-
     public event Action? OnClick;
 
     public Button(Texture texture)
@@ -23,7 +22,7 @@ public class Button : Game.Display.Abstract.IClickable, Game.Display.Abstract.IM
         OnClick?.Invoke();
     }
 
-    public void MouseIn() => OnMouseIn?.Invoke();
-    public void MouseOut() => OnMouseOut?.Invoke();
+    public void FocusIn() => OnFocusIn?.Invoke();
+    public void FocusOut() => OnFocusOut?.Invoke();
     public void MouseMove() => OnMouseMove?.Invoke();
 }

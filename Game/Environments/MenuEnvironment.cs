@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Game.Display;
 using TerminaCore.Debug;
+using TerminaCore.DOMCore;
+using TerminaCore.DOMCore.Enums;
 using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Contexts;
 using TerminaCore.GameCore.Extensions;
@@ -8,29 +11,12 @@ using TerminaCore.Graphics;
 
 public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 {
-    public Options MenuOptions { get; }
-
-    private int _index = 0;
-    public int Index
-    {
-        get => _index;
-        set
-        {
-            if (value < 0) _index = MenuOptions.Count - 1;
-            else if (value >= MenuOptions.Count) _index = 0;
-            else _index = value;
-        }
-    }
+    public Radio Radio { get; }
+    public ModelTree MenuTree { get; set; } = null!;
 
     public MenuEnvironment()
     {
-        MenuOptions = new(12, 3);
-    }
-
-    public void IndexChangeHandler(int indexOut, int indexOn)
-    {
-        MenuOptions.Selects[indexOut].SelectOut();
-        MenuOptions.Selects[indexOn].SelectIt();
+        Radio = new Radio(12, 3);
     }
 
     public void OnKeyPress(ControlContext controlContext)
@@ -39,17 +25,16 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
         {
             case ConsoleKey.UpArrow:
             case ConsoleKey.W:
-                IndexChangeHandler(Index--, Index);
+                Radio.TryPrevIndex();
                 break;
 
             case ConsoleKey.DownArrow:
             case ConsoleKey.S:
-                IndexChangeHandler(Index++, Index);
+                Radio.TryNextIndex();
                 break;
 
             case ConsoleKey.Enter:
-            case ConsoleKey.Spacebar:
-                MenuOptions.Selects[Index].Input();
+                Radio.ClickFocusedButton();
                 break;
         }
     }
@@ -57,9 +42,10 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 
     public void Draw(DrawContext context)
     {
-        foreach (var select in MenuOptions.Selects)
+        context.Draw(Radio.Texture);
+        foreach (var btn in Radio.Buttons)
         {
-            context.Draw(select.Texture);
+            context.Draw(btn.Texture);
         }
     }
 
@@ -67,39 +53,58 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
     {
         base.Initialize(context);
 
-        // int width = context.GetCanvasWidth();
-        // int height = context.GetCanvasHeight();
+        var canvas = context.GetCanvasRequired();
 
-        Style.ToPosition(MenuOptions.GetTexture(), context.GetCanvas()?.RenderTexture!, Position.Center, Position.Center);
-        MenuOptions.GetTexture().Y += 5;
+        // Radio
+        string[] btns = new string[3] { "[ ] New Game".PadRight(12), "[ ] Load".PadRight(12), "[ ] Exit".PadRight(12) };
 
-        MenuOptions.ConfigureSelect((int index, Select select) =>
+        Radio.AddButton(btns[0], () => context.SetState("new_game"));
+        Radio.AddButton(btns[1], () => context.SetState("load"));
+        Radio.AddButton(btns[2], () => context.Stop());
+
+        Radio.OnButtonFocusIn += (btn, i) =>
         {
-            select.Texture.IgnoreSet.Clear();
-            select.Text = select.Text.PadLeft(8);
+            btn.Texture.SetSymbol(0, 1, '>');
+            btn.Texture.ForegroundColor = ConsoleColor.DarkRed;
+            btn.Texture.BackgroundColor = ConsoleColor.Gray;
+        };
+        Radio.OnButtonFocusOut += (btn, i) =>
+        {
+            btn.Texture.SetSymbol(0, 1, ' ');
+            btn.Texture.ForegroundColor = ConsoleColor.Gray;
+            btn.Texture.BackgroundColor = null;
+        };
+        for (int i = 1; i < Radio.Buttons.Count; i++)
+            Radio.Buttons[i].FocusOut();
+        Radio.Buttons[0].FocusIn();
 
-            select.Texture.Y = select.Texture.Y + MenuOptions.GetTexture().Y + index;
-            select.Texture.X = select.Texture.X + MenuOptions.GetTexture().X;
+        // Nodes
+
+        MenuTree = new ModelTree(canvas);
+
+        var radioNode = new ModelNode(Radio.Texture);
+        var radioButtonsNodes = Radio.Buttons.Select(btn => new ModelNode(btn.Texture));
+
+        foreach (var rBtn in radioButtonsNodes) radioNode.AddChild(rBtn);
+        MenuTree.Body.AddChild(radioNode);
+
+        // Style
+
+        MenuTree.Body.ApplyStyle(style =>
+        {
+            style.Display = Display.Flex;
+            style.FlexPath = FlexPath.FlexColumn;
+            style.JustifyContent = FlexPosition.Center;
+            style.FlexPosition = FlexPosition.Center;
         });
 
-
-        MenuOptions.AddSelect("New Game", onInput: (select) => context.SetState("new_game"));
-        MenuOptions.AddSelect("Load", onInput: (select) => context.SetState("load"));
-        MenuOptions.AddSelect("Exit", onInput: (select) => context.Stop());
-
-        MenuOptions.OnSelectOn += (select) =>
+        radioNode.ApplyStyle(style =>
         {
-            select.Texture.SetTexture($"[>] {select.Text}", ConsoleColor.DarkRed, ConsoleColor.Gray);
-        };
-        MenuOptions.OnSelectOut += (select) =>
-        {
-            select.Texture.SetTexture($"[ ] {select.Text}", ConsoleColor.Gray, null);
-        };
-        for (int i = 0; i < MenuOptions.Count; i++)
-        {
-            MenuOptions.Selects[i].SelectOut();
-        }
+            style.Display = Display.Flex;
+            style.FlexPath = FlexPath.FlexColumn;
+            style.FlexPosition = FlexPosition.Start;
+        });
 
-        MenuOptions.Selects[Index].SelectIt();
+        MenuTree.Update();
     }
 }

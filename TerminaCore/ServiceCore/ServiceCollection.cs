@@ -1,33 +1,46 @@
-
-using System;
-using System.Collections.Generic;
+using TerminaCore.ServiceCore.Enums;
 
 namespace TerminaCore.ServiceCore;
 
-public class ServiceCollection : TerminaCore.ServiceCore.Abstract.IServiceCollection
+public class ServiceCollection : Abstract.IServiceCollection
 {
-    protected Dictionary<Type, ServiceBag> Services = new();
+    protected HashSet<ServiceDescriptor> ServiceDescriptors = new();
 
-    public void AddService<TService>(Enums.ServiceRuntime runtime, Func<object> factory)
+    public void AddService<TService>(Enums.ServiceLifetime runtime, Func<Abstract.IServiceProvider, object> factory)
     {
-        if (runtime == ServiceCore.Enums.ServiceRuntime.Singleton) AddSingleton<TService>(factory);
+        if (runtime == Enums.ServiceLifetime.Singleton) AddSingleton<TService>(factory);
         else AddTransient<TService>(factory);
+    }
+
+    public void AddService<TService>(ServiceLifetime runtime, Func<object> factory)
+    {
+        if (runtime == ServiceLifetime.Singleton) AddSingleton<TService>(factory);
+        else AddTransient<TService>(factory);
+    }
+
+    public void AddSingleton<TService>(Func<Abstract.IServiceProvider, object> factory)
+    {
+        var serviceDescriptor = new ServiceDescriptor(typeof(TService), Enums.ServiceLifetime.Singleton, factory);
+        ServiceDescriptors.Add(serviceDescriptor);
     }
 
     public void AddSingleton<TService>(Func<object> factory)
     {
-        var lazy = new Lazy<object>(factory);
-        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Singleton, () => lazy.Value);
+        var serviceDescriptor = new ServiceDescriptor(typeof(TService), Enums.ServiceLifetime.Singleton, (services) => factory.Invoke());
+        ServiceDescriptors.Add(serviceDescriptor);
     }
-    public void AddSingleton<TService>(object service)
+
+    public void AddTransient<TService>(Func<Abstract.IServiceProvider, object> factory)
     {
-        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Singleton, () => service);
+        var serviceDescriptor = new ServiceDescriptor(typeof(TService), Enums.ServiceLifetime.Transient, factory);
+        ServiceDescriptors.Add(serviceDescriptor);
     }
 
     public void AddTransient<TService>(Func<object> factory)
     {
-        Services[typeof(TService)] = new ServiceBag(Enums.ServiceRuntime.Transient, factory);
+        var serviceDescriptor = new ServiceDescriptor(typeof(TService), Enums.ServiceLifetime.Transient, (services) => factory.Invoke());
+        ServiceDescriptors.Add(serviceDescriptor);
     }
 
-    public Abstract.IServiceProvider BuildServiceProvider() => new ServiceProvider(Services);
+    public Abstract.IServiceProvider BuildServiceProvider() => new ServiceProvider(ServiceDescriptors);
 }

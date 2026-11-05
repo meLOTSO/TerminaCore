@@ -6,12 +6,11 @@ using TerminaCore.ServiceCore.Abstract;
 
 public static class DOMServiceExtensions
 {
-    public static IServiceCollection AddDOMModel(this IServiceCollection services, Canvas canvas, string? className = null)
+    public static IServiceCollection AddDOMModel(this IServiceCollection services, Func<TerminaCore.ServiceCore.Abstract.IServiceProvider, Canvas> canvasFactory)
     {
-        ArgumentNullException.ThrowIfNull(canvas);
+        ArgumentNullException.ThrowIfNull(canvasFactory);
 
-        var dom = new ModelTree(canvas, className);
-        services.AddSingleton<ModelTree>(dom);
+        services.AddSingleton<ModelTree>(services => new ModelTree(canvasFactory.Invoke(services)));
         return services;
     }
 

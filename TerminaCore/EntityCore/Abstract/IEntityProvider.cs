@@ -5,7 +5,7 @@ namespace TerminaCore.EntityCore.Abstract;
 public interface IEntityProvider
 {
     public T? GetEntity<T>() where T : class;
-    public T GetEntityRequired<T>() where T : class;
+    public T GetEntityRequired<T>(bool tryRelease = false) where T : class;
     public bool TryReleaseEntity<T>() where T : class;
     public bool TryReleaseEntity<T>(T entity) where T : class;
     public bool IsNotReleasedEntity<T>() where T : class;

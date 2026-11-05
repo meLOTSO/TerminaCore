@@ -1,18 +1,15 @@
 using TerminaCore.StateCore.Delegates;
 using System.Collections.Frozen;
-using System.Collections.Generic;
 
 namespace TerminaCore.StateCore;
 
-// Главный аппарат машины состояний, инкапуслрующий в себе словарь состояний, смену состояний, события при смене состояния
 public class StateMachine<TKey, TValue> where TKey : notnull
 {
-    private TKey? _currentState = default; // текущее состояние
+    private TKey? _currentState = default;
+    private ICollection<TValue> _currentValues = [];
     private TKey? _nextState;
     private bool _hasPendingTransition = false;
-    private ICollection<TValue> _currentValues = []; // список значений текущего состояния
 
-    // События смены состояния
     protected event StateChangedDelegate<TKey, TValue>? StateChangedEvent = null;
 
     public FrozenDictionary<TKey, FrozenSet<TValue>> StateValueData { get; protected set; } = FrozenDictionary<TKey, FrozenSet<TValue>>.Empty;
@@ -22,27 +19,20 @@ public class StateMachine<TKey, TValue> where TKey : notnull
     // Текущее состояние
     public TKey? CurrentState
     {
-        get => _currentState; // получаем текущее состояние
+        get => _currentState;
         set
         {
-            SetState(value!); // при изменении вызываем метод по смене состояния
+            SetState(value!);
         }
     }
 
-    // Список значений текущего состояния
     public ICollection<TValue> CurrentValues
     {
-        get => _currentValues; // получаем список значений текущего состояния
-        private set
-        {
-            _currentValues = value; // при изменении обновляем список из значений текущего состояния
-        }
+        get => _currentValues;
     }
 
-    // Инкапсулирует текущие состояние/значение и метод по смене состояния
     public StateContext<TKey, TValue> StateContext { get; private set; }
 
-    // Добавляем словарь состояний-списка_значений
     public StateMachine(IDictionary<TKey, List<TValue>> stateDictionary) : this()
     {
         StateValueData = stateDictionary.ToFrozenDictionary(
@@ -51,13 +41,11 @@ public class StateMachine<TKey, TValue> where TKey : notnull
         );
     }
 
-    // Регистрируем обработчик смены состояний для StateContext, связываем с методом SetState объекта StateMachine
     public StateMachine()
     {
         StateContext = new StateContext<TKey, TValue>(this);
     }
 
-    // Метод для изменения состояния
     public StateBag<TKey, TValue> SetState(TKey toState, bool usePendingState = false)
     {
         if (usePendingState)
@@ -84,7 +72,7 @@ public class StateMachine<TKey, TValue> where TKey : notnull
     {
         PreviousState = _currentState;
         _currentState = toState;
-        CurrentValues = StateValueData.GetValueOrDefault(toState) ?? [];
+        _currentValues = StateValueData.GetValueOrDefault(toState) ?? [];
 
         StateBag = new StateBag<TKey, TValue>
         {
@@ -97,13 +85,12 @@ public class StateMachine<TKey, TValue> where TKey : notnull
         return StateBag;
     }
 
-    // Метод для добавления обработки смены состояния
-    public void AddOnStateChangeHandler(StateChangedDelegate<TKey, TValue> onStateChangeHandler)
+    public void AddOnStateChangedHandler(StateChangedDelegate<TKey, TValue> onStateChangeHandler)
     {
         StateChangedEvent += onStateChangeHandler;
     }
-    // Метод для удаления обработки смены состояния
-    public void RemoveOnStateChangeHandler(StateChangedDelegate<TKey, TValue> onStateChangeHandler)
+
+    public void RemoveOnStateChangedHandler(StateChangedDelegate<TKey, TValue> onStateChangeHandler)
     {
         StateChangedEvent -= onStateChangeHandler;
     }

@@ -29,12 +29,20 @@ public class Canvas
         DefaultForeground = defaultFg;
         DefaultBackground = defaultBg;
 
-        _initialState = new Texture(height, width, BackgroundChar, DefaultForeground, DefaultBackground);
-        _renderCanvas = new Texture(height, width, BackgroundChar, DefaultForeground, DefaultBackground);
+        _initialState = new Texture(width, height, BackgroundChar, DefaultForeground, DefaultBackground);
+        _renderCanvas = new Texture(width, height, BackgroundChar, DefaultForeground, DefaultBackground);
 
         int totalCells = height * (width + 1);
         _fgColorBuffer = new ConsoleColor?[totalCells];
         _bgColorBuffer = new ConsoleColor?[totalCells];
+    }
+
+    public void ForEach(Action<Texture> action)
+    {
+        foreach (var t in Textures)
+        {
+            action.Invoke(t);
+        }
     }
 
     public IEnumerable<Texture> TexturesWhere(Predicate<Texture> predicate)
@@ -67,6 +75,13 @@ public class Canvas
         foreach (var t in Textures)
         {
             yield return func.Invoke(t);
+        }
+    }
+    public IEnumerable<T> TexturesWhereWithFilter<T>(Predicate<Texture> predicate, Func<Texture, T> filter)
+    {
+        foreach (var t in Textures)
+        {
+            if (predicate.Invoke(t)) yield return filter.Invoke(t);
         }
     }
 

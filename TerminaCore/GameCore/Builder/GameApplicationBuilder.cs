@@ -25,10 +25,11 @@ public class GameApplicationBuilder : GameBase
     public List<DrawDelegate> Draws { get => DrawCollection; set => DrawCollection = value; }
 
     // Создание фабрики для сущности
-    public void UseGameEnvironment<T>(GameFunctions gameFunctions = GameFunctions.All) where T : class, IGameEnvironment, new()
+    public GameApplicationBuilder UseGameEnvironment<T>(GameFunctions gameFunctions = GameFunctions.All) where T : class, IGameEnvironment, new()
     {
         _environmentFactories.Add(typeof(T), () => new T());
         _environmentGameFunctions.Add(typeof(T), gameFunctions);
+        return this;
     }
 
     // регистрация игровых функций сущности
