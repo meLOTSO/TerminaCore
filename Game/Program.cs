@@ -8,17 +8,17 @@ var builder = new GameApplicationBuilder();
 
 builder.Entities.UseEntity<Coins>();
 
-var canvas = builder.Services.AddASCIIGraphic(100, 28, backgroundColor: ConsoleColor.DarkRed);
+var canvas = builder.Services.AddASCIIGraphic(120, 30, backgroundColor: ConsoleColor.DarkRed);
 builder.Services.AddDOMModel(services => services.GetServiceRequired<Canvas>());
 builder.Services.AddStateMachine(builder =>
 {
     builder.AddValueForStates(GameScene.FromGameEnvironment<CursorEnvironment>(), "new_game", "load");
     builder.AddValuesForState("menu",
         GameScene.FromGameEnvironment<MenuEnvironment>(),
-        GameScene.FromGameEnvironment<ClockEnvironment>(),
-        GameScene.FromGameEnvironment<CoinsEnvironment>());
+        GameScene.FromGameEnvironment<ClockEnvironment>());
     builder.AddValuesForState("new_game",
-        GameScene.FromGameEnvironment<GameEnvironment>());
+        GameScene.FromGameEnvironment<GameEnvironment>(),
+        GameScene.FromGameEnvironment<CoinsEnvironment>());
 });
 
 var app = builder.Build();

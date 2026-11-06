@@ -33,7 +33,7 @@ public class CoinsEnvironment : GameEnvironmentBase, IDrawable, IControl
         Coins.Texture.ForegroundColor = ConsoleColor.Gray;
         Coins.Texture.BackgroundColor = ConsoleColor.Black;
         Coins.Texture.Y = 0;
-        Style.ToPositionByWidth(Coins.Texture, context.GetCanvasWidth(), Position.Center);
+        // Style.ToPositionByWidth(Coins.Texture, context.GetCanvasWidth(), Position.Center);
 
         Coins.IntentionTexture.IgnoreSet.Clear();
         Coins.IntentionTexture.BackgroundColor = ConsoleColor.Black;

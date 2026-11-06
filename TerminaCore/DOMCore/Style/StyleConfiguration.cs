@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using TerminaCore.DOMCore.Abstract;
 using TerminaCore.DOMCore.Enums;
 
@@ -32,13 +34,10 @@ public class StyleConfiguration
 
     public void Update()
     {
-        // 1. Сброс предыдущих расчетов смещений
         _styleEditor = new StyleEditor();
 
-        // 2. Базовое позиционирование (Relative / Absolute / Fixed)
         UpdatePosition();
 
-        // 3. Вычисление потока компоновки в зависимости от режима родителя/элемента
         if (_node.Parent is not null && _node.Parent.Style.Display == Display.Flex)
         {
             UpdateFlexStyle();
@@ -52,7 +51,6 @@ public class StyleConfiguration
             UpdateDisplay();
         }
 
-        // 4. Финальное применение
         ApplyXYUpdate();
     }
 
@@ -81,17 +79,35 @@ public class StyleConfiguration
         {
             case Display.Block: UpdateDisplayBlock(); break;
             case Display.Inline: UpdateDisplayInline(); break;
-            case Display.Flex: UpdateDisplayFlex(); break;
-            case Display.Grid: UpdateDisplayGrid(); break;
+            case Display.Flex:
+            case Display.Grid:
+                UpdateDisplayBlock();
+                break;
         }
     }
 
     private void UpdateDisplayBlock()
     {
-        if (_node.PrevNode is null) return;
+        if (_node.Parent is null)
+        {
+            _styleEditor.ByDisplayStrideX = 0;
+            _styleEditor.ByDisplayStrideY = 0;
+            return;
+        }
+
+        int parentX = _node.Parent.Texture.X;
+        int parentY = _node.Parent.Texture.Y;
+        int gapY = _node.Parent.Style.GapY;
+
+        if (_node.PrevNode is null)
+        {
+            _styleEditor.ByDisplayStrideX = parentX;
+            _styleEditor.ByDisplayStrideY = parentY;
+            return;
+        }
 
         var prev = _node.PrevNode;
-        int strideY = prev.Texture.Y + prev.Texture.Height + 1;
+        int strideY = prev.Texture.Y + prev.Texture.Height + gapY;
 
         if (prev.Style.Display == Display.Inline)
         {
@@ -99,47 +115,49 @@ public class StyleConfiguration
             for (int i = _node.Index - 1; i >= 0; i--)
             {
                 if (_node.Neighbors[i].Style.Display == Display.Inline)
-                    strideY = Math.Max(strideY, _node.Neighbors[i].Texture.Y + _node.Neighbors[i].Texture.Height + 1);
+                {
+                    strideY = Math.Max(strideY, _node.Neighbors[i].Texture.Y + _node.Neighbors[i].Texture.Height + gapY);
+                }
                 else break;
             }
         }
-        _styleEditor.ByDisplayStrideX = 0;
+
+        _styleEditor.ByDisplayStrideX = parentX;
         _styleEditor.ByDisplayStrideY = strideY;
     }
 
     private void UpdateDisplayInline()
     {
-        if (_node.PrevNode is null) return;
+        if (_node.Parent is null)
+        {
+            _styleEditor.ByDisplayStrideX = 0;
+            _styleEditor.ByDisplayStrideY = 0;
+            return;
+        }
+
+        int parentX = _node.Parent.Texture.X;
+        int parentY = _node.Parent.Texture.Y;
+        int gapX = _node.Parent.Style.GapX;
+        int gapY = _node.Parent.Style.GapY;
+
+        if (_node.PrevNode is null)
+        {
+            _styleEditor.ByDisplayStrideX = parentX;
+            _styleEditor.ByDisplayStrideY = parentY;
+            return;
+        }
 
         var prev = _node.PrevNode;
         if (prev.Style.Display == Display.Inline)
         {
-            _styleEditor.ByDisplayStrideX = prev.Texture.X + prev.Texture.Width + 1;
+            _styleEditor.ByDisplayStrideX = prev.Texture.X + prev.Texture.Width + gapX;
             _styleEditor.ByDisplayStrideY = prev.Texture.Y;
         }
         else
         {
-            _styleEditor.ByDisplayStrideX = 0;
-            _styleEditor.ByDisplayStrideY = prev.Texture.Y + prev.Texture.Height + 1;
+            _styleEditor.ByDisplayStrideX = parentX;
+            _styleEditor.ByDisplayStrideY = prev.Texture.Y + prev.Texture.Height + gapY;
         }
-    }
-
-    private void UpdateDisplayFlex()
-    {
-        if (_node.PrevNode is null) return;
-
-        var prev = _node.PrevNode;
-        _styleEditor.ByDisplayStrideX = 0;
-        _styleEditor.ByDisplayStrideY = prev.Texture.Y + prev.Texture.Height + 1;
-    }
-
-    private void UpdateDisplayGrid()
-    {
-        if (_node.PrevNode is null) return;
-
-        var prev = _node.PrevNode;
-        _styleEditor.ByDisplayStrideX = 0;
-        _styleEditor.ByDisplayStrideY = prev.Texture.Y + prev.Texture.Height + 1;
     }
 
     #endregion
@@ -150,28 +168,17 @@ public class StyleConfiguration
     {
         switch (this.Position)
         {
-            case Enums.Position.Absolute: UpdatePositionAbsolute(); break;
-            case Enums.Position.Relative: UpdatePositionRelative(); break;
-            case Enums.Position.Fixed: UpdatePositionFixed(); break;
+            case Enums.Position.Absolute:
+                _styleEditor.ByPositionStrideX = _node.NearestRelativeParent?.Texture.X ?? 0;
+                _styleEditor.ByPositionStrideY = _node.NearestRelativeParent?.Texture.Y ?? 0;
+                break;
+
+            case Enums.Position.Relative:
+            case Enums.Position.Fixed:
+                _styleEditor.ByPositionStrideX = 0;
+                _styleEditor.ByPositionStrideY = 0;
+                break;
         }
-    }
-
-    private void UpdatePositionAbsolute()
-    {
-        _styleEditor.ByPositionStrideX = _node.NearestRelativeParent?.Texture.X ?? 0;
-        _styleEditor.ByPositionStrideY = _node.NearestRelativeParent?.Texture.Y ?? 0;
-    }
-
-    private void UpdatePositionRelative()
-    {
-        _styleEditor.ByPositionStrideX = _node.NearestRelativeParent?.Texture.X ?? 0;
-        _styleEditor.ByPositionStrideY = _node.NearestRelativeParent?.Texture.Y ?? 0;
-    }
-
-    private void UpdatePositionFixed()
-    {
-        _styleEditor.ByPositionStrideX = 0;
-        _styleEditor.ByPositionStrideY = 0;
     }
 
     #endregion
@@ -315,7 +322,7 @@ public class StyleConfiguration
         {
             FlexPosition.End => Math.Max(0, crossContainerSize - myCrossSize),
             FlexPosition.Center => Math.Max(0, (crossContainerSize - myCrossSize) / 2),
-            _ => 0 // FlexPosition.Start
+            _ => 0
         };
 
         int finalX = isRow ? mainStride : crossOffset;
@@ -347,7 +354,6 @@ public class StyleConfiguration
         Span<int> maxColWidth = stackalloc int[gridCols];
         Span<int> maxRowHeight = stackalloc int[gridRows];
 
-        // 1. Поиск максимальных размеров колонок и строк (с continue вместо break)
         for (int r = 0; r < gridRows; r++)
         {
             for (int c = 0; c < gridCols; c++)
@@ -361,11 +367,9 @@ public class StyleConfiguration
             }
         }
 
-        // 2. Координаты текущей ячейки
         int rowI = index / gridCols;
         int colI = index % gridCols;
 
-        // 3. Вычисление суммарного сдвига
         int shiftX = 0;
         for (int c = 0; c < colI; c++)
         {
@@ -388,20 +392,34 @@ public class StyleConfiguration
 
     public void ApplyXYUpdate()
     {
-        if (_node.Parent is not null && _node.Parent.Style.Display == Display.Flex)
+        if (Position == Enums.Position.Absolute)
+        {
+            _node.Texture.X = X + _styleEditor.ByPositionStrideX;
+            _node.Texture.Y = Y + _styleEditor.ByPositionStrideY;
+            return;
+        }
+
+        if (_node.Parent is null)
+        {
+            _node.Texture.X = X;
+            _node.Texture.Y = Y;
+            return;
+        }
+
+        if (_node.Parent.Style.Display == Display.Flex)
         {
             _node.Texture.X = X + _styleEditor.ByFlexX;
             _node.Texture.Y = Y + _styleEditor.ByFlexY;
         }
-        else if (_node.Parent is not null && _node.Parent.Style.Display == Display.Grid)
+        else if (_node.Parent.Style.Display == Display.Grid)
         {
             _node.Texture.X = X + _styleEditor.ByGridX;
             _node.Texture.Y = Y + _styleEditor.ByGridY;
         }
         else
         {
-            _node.Texture.X = X + _styleEditor.ByPositionStrideX + _styleEditor.ByDisplayStrideX;
-            _node.Texture.Y = Y + _styleEditor.ByPositionStrideY + _styleEditor.ByDisplayStrideY;
+            _node.Texture.X = X + _styleEditor.ByDisplayStrideX;
+            _node.Texture.Y = Y + _styleEditor.ByDisplayStrideY;
         }
     }
 

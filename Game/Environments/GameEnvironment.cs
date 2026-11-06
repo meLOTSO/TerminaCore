@@ -1,4 +1,5 @@
 using Game.Display;
+using Game.Textures;
 using TerminaCore.DOMCore;
 using TerminaCore.DOMCore.Enums;
 using TerminaCore.GameCore.Abstract.GameBasicFunctional;
@@ -29,23 +30,16 @@ public class GameEnvironment : GameEnvironmentBase, IControl, IDrawable
 
         var canvas = context.GetCanvasRequired();
 
-        GameNode = new ModelNode(new Texture(canvas.Width, canvas.Height));
+        GameNode = new ModelNode(MapTextures.GetSea(canvas.Width, canvas.Height));
+        ModelNode ground = new(MapTextures.GetGround(canvas.Width, canvas.Height, ConsoleColor.DarkGreen, 2700, Enums.RenderType.Random));
+        ModelNode snow = new(MapTextures.GetGround(canvas.Width, canvas.Height, ConsoleColor.DarkGray, 100, Enums.RenderType.Random));
+        snow.Style.Position = TerminaCore.DOMCore.Enums.Position.Absolute;
+        ModelNode nature = new(MapTextures.GetGround(canvas.Width, canvas.Height, ConsoleColor.White, 300, Enums.RenderType.Random));
+        nature.Style.Position = TerminaCore.DOMCore.Enums.Position.Absolute;
 
-        Texture seaTexture = new Texture(canvas.Width, canvas.Height, foregroundColor: ConsoleColor.Blue, backgroundColor: ConsoleColor.DarkCyan) { IgnoreSet = new() };
-        for (int i = 0; i < 20; i++)
-        {
-            int randX = Random.Shared.Next(0, canvas.Width - 1);
-            int randY = Random.Shared.Next(0, canvas.Height - 1);
-            while (seaTexture[randY, randX] == '~')
-                (randX, randY) = (Random.Shared.Next(0, canvas.Width - 1), Random.Shared.Next(0, canvas.Height - 1));
-            seaTexture[randY, randX] = '~';
-        }
-
-        ModelNode sea = new(seaTexture);
-        ModelNode spawn = new(new Texture("&&&", ConsoleColor.DarkBlue));
-
-        GameNode.AddChild(sea);
-        sea.AddChild(spawn);
+        GameNode.AddChild(ground);
+        GameNode.AddChild(nature);
+        GameNode.AddChild(snow);
 
         GameNode.UpdateStyleBFS();
     }

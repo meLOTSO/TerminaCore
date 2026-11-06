@@ -12,7 +12,7 @@ using TerminaCore.Graphics;
 public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 {
     public Radio Radio { get; }
-    public ModelTree MenuTree { get; set; } = null!;
+    public ModelNode MenuNode { get; set; } = null!;
 
     public MenuEnvironment()
     {
@@ -42,11 +42,7 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 
     public void Draw(DrawContext context)
     {
-        context.Draw(Radio.Texture);
-        foreach (var btn in Radio.Buttons)
-        {
-            context.Draw(btn.Texture);
-        }
+        MenuNode.ForEachBFS(node => context.Draw(node.Texture));
     }
 
     public override void Initialize(GameContext context)
@@ -80,17 +76,17 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
 
         // Nodes
 
-        MenuTree = new ModelTree(canvas);
+        MenuNode = new ModelNode(new Texture(canvas.Width, canvas.Height, ' ', null, ConsoleColor.DarkRed) { IgnoreSet = new() });
 
         var radioNode = new ModelNode(Radio.Texture);
         var radioButtonsNodes = Radio.Buttons.Select(btn => new ModelNode(btn.Texture));
 
         foreach (var rBtn in radioButtonsNodes) radioNode.AddChild(rBtn);
-        MenuTree.Body.AddChild(radioNode);
+        MenuNode.AddChild(radioNode);
 
         // Style
 
-        MenuTree.Body.ApplyStyle(style =>
+        MenuNode.ApplyStyle(style =>
         {
             style.Display = Display.Flex;
             style.FlexPath = FlexPath.FlexColumn;
@@ -105,6 +101,6 @@ public class MenuEnvironment : GameEnvironmentBase, IDrawable, IControl
             style.FlexPosition = FlexPosition.Start;
         });
 
-        MenuTree.Update();
+        MenuNode.UpdateStyleBFS();
     }
 }

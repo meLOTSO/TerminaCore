@@ -12,7 +12,7 @@ public class CursorEnvironment : GameEnvironmentBase, IUpdateable, IDrawable, IC
 {
     private char _cursorSymbol = '↑';
     private ConsoleColor? _color = ConsoleColor.White;
-    private ConsoleColor? _backgroundColor = ConsoleColor.DarkGray;
+    private ConsoleColor? _backgroundColor = ConsoleColor.Black;
     private readonly Texture _cursorTexture;
     private int _windowWidth;
     private int _windowHeight;
