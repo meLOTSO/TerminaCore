@@ -1,6 +1,6 @@
 using TerminaCore.Graphics;
 
-public class Coins
+public class BankCore
 {
     private int _sum = 0;
     private int _intention = 0;
@@ -14,19 +14,19 @@ public class Coins
     public ConsoleColor? NegativeIntentionColor { get; set; } = ConsoleColor.DarkYellow;
     public ConsoleColor? NegativeSumColor { get; set; } = ConsoleColor.Red;
 
-    public Coins()
+    public BankCore()
     {
-        this.Texture = new Texture(string.Format($"COINS: {_sum.ToString().PadLeft(4)}"));
+        this.Texture = new Texture(string.Format(Sum.ToString().PadLeft(4)));
     }
 
-    public void IntentionToSummarize(int sum)
+    public virtual void IntentionToSummarize(int sum)
     {
         _isIntention = true;
         _intention += sum;
         UpdateIntention();
     }
 
-    public void ApplyIntention()
+    public virtual void ApplyIntention()
     {
         _isIntention = false;
         if (_intention < 0)
@@ -41,7 +41,7 @@ public class Coins
         _sum.ToString().PadLeft(4).AsSpan().CopyTo(this.Texture.Buffer.AsSpan(7));
     }
 
-    private void UpdateIntention()
+    protected virtual void UpdateIntention()
     {
         if (_intention + _sum < _sum)
         {

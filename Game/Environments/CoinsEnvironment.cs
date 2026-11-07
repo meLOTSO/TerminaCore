@@ -4,7 +4,7 @@ using TerminaCore.GameCore.Extensions;
 
 public class CoinsEnvironment : GameEnvironmentBase, IDrawable, IControl
 {
-    public Coins Coins { get; private set; } = null!;
+    public Bank Coins { get; private set; } = null!;
 
     public void Draw(DrawContext context)
     {
@@ -27,7 +27,7 @@ public class CoinsEnvironment : GameEnvironmentBase, IDrawable, IControl
     {
         base.Initialize(context);
 
-        Coins = context.Entities.GetEntityRequired<Coins>(true);
+        Coins = context.Entities.GetEntityRequired<Bank>(true);
 
         Coins.Texture.IgnoreSet.Clear();
         Coins.Texture.ForegroundColor = ConsoleColor.Gray;

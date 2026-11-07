@@ -6,7 +6,7 @@ using TerminaCore.Graphics;
 
 var builder = new GameApplicationBuilder();
 
-builder.Entities.UseEntity<Coins>();
+builder.Entities.UseEntity<Bank>();
 
 var canvas = builder.Services.AddASCIIGraphic(120, 30, backgroundColor: ConsoleColor.DarkRed);
 builder.Services.AddDOMModel(services => services.GetServiceRequired<Canvas>());
@@ -30,3 +30,4 @@ app.UseDOMModel();
 app.SetState("menu");
 
 app.Run();
+
