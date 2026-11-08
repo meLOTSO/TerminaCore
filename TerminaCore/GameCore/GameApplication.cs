@@ -80,6 +80,7 @@ public class GameApplication : GameBase
             ControlContext.Pressed = true;
             ControlContext.Key = key.Key;
             ControlContext.Modifiers = key.Modifiers;
+            ControlContext.KeyChar = key.KeyChar;
             foreach (var c in OnKeyPressCollection)
             {
                 c.Invoke(ControlContext);

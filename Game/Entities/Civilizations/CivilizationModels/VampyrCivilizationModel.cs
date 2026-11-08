@@ -5,7 +5,7 @@ namespace Game.Entities.Civilizations.CivilizationModels;
 
 public class VampyrCivilizationModel : CivilizationModelBase
 {
-    public VampyrCivilizationModel() : base(new VampyrCivilizationFactory())
+    public VampyrCivilizationModel() : base(Enums.CivilizationType.Vampyr, new VampyrCivilizationFactory())
     {
     }
 }

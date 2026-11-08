@@ -5,7 +5,7 @@ using TerminaCore.Graphics;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Human;
 
-public class HumanKingHero : KingHeroBase, ICivilizationEntity
+public class HumanKingHero : KingHeroBase
 {
     public override int AttackPlus => 2;
 
@@ -17,8 +17,6 @@ public class HumanKingHero : KingHeroBase, ICivilizationEntity
     public override string Name => "Верховный Король";
 
     public override Texture Texture => new Texture("^", ConsoleColor.DarkBlue);
-
-    public CivilizationsType Civilization => CivilizationsType.Human;
 
     public override int SummarizeValue => 2;
 

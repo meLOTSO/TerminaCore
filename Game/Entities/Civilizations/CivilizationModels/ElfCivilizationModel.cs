@@ -5,7 +5,7 @@ namespace Game.Entities.Civilizations.CivilizationModels;
 
 public class ElfCivilizationModel : CivilizationModelBase
 {
-    public ElfCivilizationModel() : base(new ElfCivilizationFactory())
+    public ElfCivilizationModel() : base(Enums.CivilizationType.Elf, new ElfCivilizationFactory())
     {
     }
 }

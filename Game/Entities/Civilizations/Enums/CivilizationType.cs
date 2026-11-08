@@ -1,6 +1,6 @@
 namespace Game.Entities.Civilizations.Enums;
 
-public enum CivilizationsType
+public enum CivilizationType
 {
     Human,
     Elf,

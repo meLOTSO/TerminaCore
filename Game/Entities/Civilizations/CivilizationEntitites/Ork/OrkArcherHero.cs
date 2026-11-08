@@ -4,7 +4,7 @@ using Game.Entities.Civilizations.Enums;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Ork;
 
-public class OrkArcherHero : ArcherHeroBase, ICivilizationEntity
+public class OrkArcherHero : ArcherHeroBase
 {
     public override int Cost => 6;
 
@@ -17,8 +17,6 @@ public class OrkArcherHero : ArcherHeroBase, ICivilizationEntity
     public override int Damage => 6;
 
     public override string Name => "Метатель топоров";
-
-    public CivilizationsType Civilization => CivilizationsType.Ork;
 
     public OrkArcherHero() : base(20, 10)
     {

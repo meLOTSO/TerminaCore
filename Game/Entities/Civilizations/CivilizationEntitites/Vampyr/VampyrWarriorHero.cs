@@ -4,7 +4,7 @@ using Game.Entities.Civilizations.Enums;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Vampyr;
 
-public class VampyrWarriorHero : WarriorHeroBase, ICivilizationEntity
+public class VampyrWarriorHero : WarriorHeroBase
 {
     public override int Cost => 6;
 
@@ -17,8 +17,6 @@ public class VampyrWarriorHero : WarriorHeroBase, ICivilizationEntity
     public override int Damage => 3;
 
     public override string Name => "Вампир-страж";
-
-    public CivilizationsType Civilization => CivilizationsType.Vampyr;
 
     public VampyrWarriorHero() : base(14, 15)
     {

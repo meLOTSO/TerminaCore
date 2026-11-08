@@ -5,7 +5,7 @@ namespace Game.Entities.Civilizations.CivilizationModels;
 
 public class HumanCivilizationModel : CivilizationModelBase
 {
-    public HumanCivilizationModel() : base(new HumanCivilizationFactory())
+    public HumanCivilizationModel() : base(Enums.CivilizationType.Human, new HumanCivilizationFactory())
     {
     }
 }

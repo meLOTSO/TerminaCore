@@ -5,7 +5,7 @@ using TerminaCore.Graphics;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Elf;
 
-public class ElfWarriorHero : WarriorHeroBase, ICivilizationEntity
+public class ElfWarriorHero : WarriorHeroBase
 {
     public override int AttackPlus => 1;
 
@@ -25,8 +25,6 @@ public class ElfWarriorHero : WarriorHeroBase, ICivilizationEntity
     public override int Damage => 2;
 
     public override string Name => "Эльфийский танцор клинка";
-
-    public CivilizationsType Civilization => CivilizationsType.Elf;
 
     public override int Cost => 6;
 

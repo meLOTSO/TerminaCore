@@ -5,7 +5,7 @@ using TerminaCore.Graphics;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Human;
 
-public class HumanWarriorHero : WarriorHeroBase, ICivilizationEntity
+public class HumanWarriorHero : WarriorHeroBase
 {
 
     public override int AttackPlus => 2;
@@ -18,8 +18,6 @@ public class HumanWarriorHero : WarriorHeroBase, ICivilizationEntity
     public override string Name => "Латник";
 
     public override Texture Texture => new Texture("/", ConsoleColor.DarkBlue);
-
-    public CivilizationsType Civilization => CivilizationsType.Human;
 
     public override int Cost => 5;
 

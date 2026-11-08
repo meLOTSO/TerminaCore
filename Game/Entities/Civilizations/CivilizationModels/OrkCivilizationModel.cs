@@ -5,7 +5,7 @@ namespace Game.Entities.Civilizations.CivilizationModels;
 
 public class OrkCivilizationModel : CivilizationModelBase
 {
-    public OrkCivilizationModel() : base(new OrkCivilizationFactory())
+    public OrkCivilizationModel() : base(Enums.CivilizationType.Ork, new OrkCivilizationFactory())
     {
     }
 }

@@ -5,7 +5,7 @@ using TerminaCore.Graphics;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Elf;
 
-public class ElfKingHero : KingHeroBase, ICivilizationEntity
+public class ElfKingHero : KingHeroBase
 {
     public override int AttackPlus => 0;
 
@@ -24,8 +24,6 @@ public class ElfKingHero : KingHeroBase, ICivilizationEntity
     public override int Damage => 3;
 
     public override string Name => "Владыка леса";
-
-    public CivilizationsType Civilization => CivilizationsType.Elf;
 
     public override int SummarizeValue => 3;
 

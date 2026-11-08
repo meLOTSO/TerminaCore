@@ -11,6 +11,7 @@ public abstract class EntityBase
 
     protected int HealthValue;
 
+    public Guid Id { get; } = Guid.NewGuid();
     public abstract string Name { get; }
     public abstract Texture Texture { get; }
 

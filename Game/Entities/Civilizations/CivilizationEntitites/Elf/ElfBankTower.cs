@@ -5,11 +5,9 @@ using TerminaCore.Graphics;
 
 namespace Game.Entities.Civilizations.CivilizationEntities.Elf;
 
-public class ElfBankTower : BankTowerBase, ICivilizationEntity
+public class ElfBankTower : BankTowerBase
 {
     public override string Name => "Древо жизни";
-
-    public CivilizationsType Civilization => CivilizationsType.Elf;
 
     public override int SummarizeValue => 4;
 
