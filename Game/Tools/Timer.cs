@@ -1,6 +1,9 @@
+using TerminaCore.GameCore.Abstract.GameBasicFunctional;
+using TerminaCore.GameCore.Contexts;
+
 namespace Game.Tools;
 
-public class Timer
+public class Timer : IUpdateable
 {
     private float _time;
     private float _timeout;
@@ -35,11 +38,11 @@ public class Timer
         _time = _timeout;
     }
 
-    public void Update(float deltaTime)
+    public void Update(UpdateContext updateContext)
     {
         if (_stopped) return;
 
-        _time -= deltaTime;
+        _time -= updateContext.DeltaTime;
         if (_time <= 0)
         {
             OnTimeout?.Invoke(this);

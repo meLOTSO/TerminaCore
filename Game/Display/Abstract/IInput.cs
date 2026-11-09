@@ -1,4 +1,5 @@
 using System.Text;
+using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.Graphics;
 
 namespace Game.Display.Abstract;

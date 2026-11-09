@@ -1,9 +1,9 @@
 using Game.Display.Abstract;
+using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.Graphics;
 
 public interface IOption
 {
-    public Texture Texture { get; set; }
     public IReadOnlyList<ISelect> Selects { get; }
 
     public event Action<ISelect>? OnSelectAdd;

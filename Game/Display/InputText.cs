@@ -4,12 +4,16 @@ using System.Text;
 using Game.Display.Abstract;
 using Game.Display.Enums;
 using TerminaCore.DOMCore;
+using TerminaCore.DOMCore.Enums;
+using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Contexts;
+using TerminaCore.GameCore.Extensions;
 using TerminaCore.Graphics;
+using TerminaCore.Graphics.Style;
 
 namespace Game.Display;
 
-public class InputText : IInput
+public class InputText : IInput, IDrawable, IUpdateable, IControl
 {
     private int _currIndex = 0;
     private Tools.Timer _timer;
@@ -27,18 +31,62 @@ public class InputText : IInput
     public StringBuilder Input { get; }
     public string Label { get; }
     public int MaxLength { get; }
+    public bool ShowLabel { get; set; } = true;
+    public bool ShowBlick { get; set; } = true;
+    public int InputMargin { get; set; } = 1;
+    public PositionOverEntity LabelPosition { get; set; } = PositionOverEntity.None;
 
     public InputText(string labelText, int maxLength)
     {
         MaxLength = maxLength;
         InputTexture = new Texture(maxLength, 1);
         LabelTexture = new Texture(labelText);
+        LabelTexture.IgnoreSet.Clear();
         Label = labelText;
         Input = new StringBuilder();
 
         _timer = new Tools.Timer(DisableCharTime);
         ResetCurrCharBlink();
     }
+
+    public string GetText() => Input.ToString().Trim();
+
+    #region Игровые методы
+
+    public void Update(UpdateContext updateContext)
+    {
+        _timer.Update(updateContext);
+    }
+
+    public void Draw(DrawContext drawContext)
+    {
+        if (ShowLabel)
+        {
+            SetLabelPosition(LabelPosition);
+            drawContext.Draw(LabelTexture);
+        }
+
+        drawContext.Draw(InputTexture);
+
+        if (ShowBlick)
+            drawContext.Draw(CurrentCharTexture);
+    }
+
+    public void OnKeyPress(ControlContext context)
+    {
+        if (context.Key == ConsoleKey.Backspace)
+            this.Backspace();
+        else if (context.Key == ConsoleKey.LeftArrow)
+            this.StepLeft();
+        else if (context.Key == ConsoleKey.RightArrow)
+            this.StepRight();
+        else
+        {
+            this.AddSymbol(context.KeyChar);
+        }
+    }
+
+    #endregion
 
     public virtual void AddSymbol(char symbol)
     {
@@ -83,11 +131,6 @@ public class InputText : IInput
         return true;
     }
 
-    public void Update(float deltaTime)
-    {
-        _timer.Update(deltaTime);
-    }
-
     private void UpdateInputText()
     {
         for (int i = 0; i < MaxLength; i++)
@@ -97,21 +140,65 @@ public class InputText : IInput
         }
     }
 
+    public void SetLabelPosition(PositionOverEntity positionOverEntity, bool useCache = true)
+    {
+        if (useCache && LabelPosition == positionOverEntity) return;
+
+        switch (positionOverEntity)
+        {
+            case PositionOverEntity.TopLeft: SetLabelPositionTop(Position.Start); break;
+            case PositionOverEntity.TopCenter: SetLabelPositionTop(Position.Center); break;
+            case PositionOverEntity.TopRight: SetLabelPositionTop(Position.End); break;
+            case PositionOverEntity.BottomLeft: SetLabelPositionBottom(Position.Start); break;
+            case PositionOverEntity.BottomCenter: SetLabelPositionBottom(Position.Center); break;
+            case PositionOverEntity.BottomRight: SetLabelPositionBottom(Position.End); break;
+            case PositionOverEntity.LeftTop:
+            case PositionOverEntity.LeftCenter:
+            case PositionOverEntity.LeftBottom:
+                SetLabelPositionLeft();
+                break;
+            case PositionOverEntity.RightTop:
+            case PositionOverEntity.RightCenter:
+            case PositionOverEntity.RightBottom:
+                SetLabelPositionRight();
+                break;
+        }
+        LabelPosition = positionOverEntity;
+        UpdateCurrentCharIndexTexture();
+    }
+
+    protected virtual void SetLabelPositionTop(Position justifyContent = Position.Start)
+    {
+        Style.ToPositionByWidth(LabelTexture, InputTexture, justifyContent);
+        LabelTexture.Y = InputTexture.Y - 1 - InputMargin;
+    }
+
+    protected virtual void SetLabelPositionBottom(Position justifyContent = Position.Start)
+    {
+        Style.ToPositionByWidth(LabelTexture, InputTexture, justifyContent);
+        LabelTexture.Y = InputTexture.Y + 1 + InputMargin;
+    }
+
+    protected virtual void SetLabelPositionLeft()
+    {
+        LabelTexture.X = InputTexture.X - LabelTexture.Width - InputMargin;
+        LabelTexture.Y = InputTexture.Y;
+    }
+
+    protected virtual void SetLabelPositionRight()
+    {
+        LabelTexture.X = InputTexture.X + InputTexture.Width + InputMargin;
+        LabelTexture.Y = InputTexture.Y;
+    }
+
+    #region Методы для работы с бликующим Char
+
     private void UpdateCurrentCharIndexTexture()
     {
         CurrentCharTexture.Y = this.InputTexture!.Y;
         CurrentCharTexture.X = this.InputTexture!.X + _currIndex;
         CurrentCharTexture.SetSymbol(0, 0, _currIndex < Input.Length ? Input[_currIndex] : ' ');
     }
-
-    // public void UpdateLabelPosition(PositionOverType positionOverType)
-    // {
-    //     switch (positionOverType)
-    //     {
-
-    //         default:
-    //     }
-    // }
 
     private void DisableCurrChar(Tools.Timer timer)
     {
@@ -138,26 +225,5 @@ public class InputText : IInput
         _timer.OnTimeout = DisableCurrChar;
     }
 
-    public void TexturesForDraw(Action<Texture> drawAction, bool withLabel = true)
-    {
-        if (withLabel)
-            drawAction.Invoke(LabelTexture);
-
-        drawAction.Invoke(InputTexture);
-        drawAction.Invoke(CurrentCharTexture);
-    }
-
-    public void ControlHandler(ControlContext context)
-    {
-        if (context.Key == ConsoleKey.Backspace)
-            this.Backspace();
-        else if (context.Key == ConsoleKey.LeftArrow)
-            this.StepLeft();
-        else if (context.Key == ConsoleKey.RightArrow)
-            this.StepRight();
-        else
-        {
-            this.AddSymbol(context.KeyChar);
-        }
-    }
+    #endregion
 }

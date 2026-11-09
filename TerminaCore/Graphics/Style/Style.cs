@@ -1,80 +1,75 @@
-using System;
-using TerminaCore.Graphics;
+namespace TerminaCore.Graphics.Style;
 
 public static class Style
 {
-    public static (int X, int Y) ToPosition(Texture texture, int width, int height, Position widthPos, Position heightPos)
+    // --- Применение позиций (Mutating methods) ---
+
+    public static (int X, int Y) ToPosition(this Texture texture, int width, int height, Position widthPos, Position heightPos)
     {
         ArgumentNullException.ThrowIfNull(texture);
-        return (ToPositionByWidth(texture, width, widthPos), ToPositionByHeight(texture, height, heightPos));
+        return (texture.ToPositionByWidth(width, widthPos), texture.ToPositionByHeight(height, heightPos));
     }
 
-    public static int ToPositionByWidth(Texture texture, int width, Position position)
+    public static int ToPositionByWidth(this Texture texture, int width, Position position)
     {
         ArgumentNullException.ThrowIfNull(texture);
-        return texture.X = GetPositionWidth(texture, width, position);
+        return texture.X = GetPositionWidth(texture.Width, width, position);
     }
 
-    public static int ToPositionByHeight(Texture texture, int height, Position position)
+    public static int ToPositionByHeight(this Texture texture, int height, Position position)
     {
         ArgumentNullException.ThrowIfNull(texture);
-        return texture.Y = GetPositionHeight(texture, height, position);
+        return texture.Y = GetPositionHeight(texture.Height, height, position);
     }
 
-    public static int ToPositionByWidth(Texture childTexture, Texture parentTexture, Position position)
+    public static (int X, int Y) ToPosition(this Texture childTexture, Texture parentTexture, Position widthPos, Position heightPos)
+    {
+        ArgumentNullException.ThrowIfNull(childTexture);
+        ArgumentNullException.ThrowIfNull(parentTexture);
+        return (childTexture.ToPositionByWidth(parentTexture, widthPos), childTexture.ToPositionByHeight(parentTexture, heightPos));
+    }
+
+    public static int ToPositionByWidth(this Texture childTexture, Texture parentTexture, Position position)
     {
         ArgumentNullException.ThrowIfNull(childTexture);
         ArgumentNullException.ThrowIfNull(parentTexture);
         return childTexture.X = GetPositionWidth(childTexture, parentTexture, position);
     }
 
-    public static int ToPositionByHeight(Texture childTexture, Texture parentTexture, Position position)
+    public static int ToPositionByHeight(this Texture childTexture, Texture parentTexture, Position position)
     {
         ArgumentNullException.ThrowIfNull(childTexture);
         ArgumentNullException.ThrowIfNull(parentTexture);
         return childTexture.Y = GetPositionHeight(childTexture, parentTexture, position);
     }
 
-    public static (int X, int Y) ToPosition(Texture childTexture, Texture parentTexture, Position widthPos, Position heightPos)
-    {
-        ArgumentNullException.ThrowIfNull(childTexture);
-        ArgumentNullException.ThrowIfNull(parentTexture);
-        return (ToPositionByWidth(childTexture, parentTexture, widthPos), ToPositionByHeight(childTexture, parentTexture, heightPos));
-    }
-
     // --- Чистые вычисления (Pure Functions) ---
 
-    public static (int X, int Y) GetPosition(Texture texture, int width, int height, Position widthPos, Position heightPos)
+    public static (int X, int Y) GetPosition(this Texture texture, int width, int height, Position widthPos, Position heightPos)
     {
         ArgumentNullException.ThrowIfNull(texture);
-        return (GetPositionWidth(texture, width, widthPos), GetPositionHeight(texture, height, heightPos));
+        return (GetPositionWidth(texture.Width, width, widthPos), GetPositionHeight(texture.Height, height, heightPos));
     }
 
-    public static int GetPositionWidth(Texture texture, int width, Position position)
+    public static int GetPositionWidth(int itemWidth, int containerWidth, Position position)
     {
-        ArgumentNullException.ThrowIfNull(texture);
-        if (texture.Width > width) return texture.X;
-
         return position switch
         {
             Position.Start => 0,
-            Position.End => width - texture.Width,
-            Position.Center => (width - texture.Width) / 2,
-            _ => texture.X
+            Position.Center => Math.Max(0, (containerWidth - itemWidth) / 2),
+            Position.End => Math.Max(0, containerWidth - itemWidth),
+            _ => 0
         };
     }
 
-    public static int GetPositionHeight(Texture texture, int height, Position position)
+    public static int GetPositionHeight(int itemHeight, int containerHeight, Position position)
     {
-        ArgumentNullException.ThrowIfNull(texture);
-        if (texture.Height > height) return texture.Y;
-
         return position switch
         {
             Position.Start => 0,
-            Position.End => height - texture.Height,
-            Position.Center => (height - texture.Height) / 2,
-            _ => texture.Y
+            Position.Center => Math.Max(0, (containerHeight - itemHeight) / 2),
+            Position.End => Math.Max(0, containerHeight - itemHeight),
+            _ => 0
         };
     }
 
@@ -89,29 +84,13 @@ public static class Style
     {
         ArgumentNullException.ThrowIfNull(childTexture);
         ArgumentNullException.ThrowIfNull(parentTexture);
-        if (childTexture.Width > parentTexture.Width) return childTexture.X;
-
-        return position switch
-        {
-            Position.Start => parentTexture.X,
-            Position.End => parentTexture.X + parentTexture.Width - childTexture.Width,
-            Position.Center => parentTexture.X + (parentTexture.Width - childTexture.Width) / 2,
-            _ => childTexture.X
-        };
+        return parentTexture.X + GetPositionWidth(childTexture.Width, parentTexture.Width, position);
     }
 
     public static int GetPositionHeight(Texture childTexture, Texture parentTexture, Position position)
     {
         ArgumentNullException.ThrowIfNull(childTexture);
         ArgumentNullException.ThrowIfNull(parentTexture);
-        if (childTexture.Height > parentTexture.Height) return childTexture.Y;
-
-        return position switch
-        {
-            Position.Start => parentTexture.Y,
-            Position.End => parentTexture.Y + parentTexture.Height - childTexture.Height,
-            Position.Center => parentTexture.Y + (parentTexture.Height - childTexture.Height) / 2,
-            _ => childTexture.Y
-        };
+        return parentTexture.Y + GetPositionHeight(childTexture.Height, parentTexture.Height, position);
     }
 }

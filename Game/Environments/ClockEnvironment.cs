@@ -3,6 +3,7 @@ using TerminaCore.GameCore.Abstract.GameBasicFunctional;
 using TerminaCore.GameCore.Contexts;
 using TerminaCore.GameCore.Extensions;
 using TerminaCore.Graphics;
+using TerminaCore.Graphics.Style;
 
 public class ClockEnvironment : GameEnvironmentBase, IDrawable, IUpdateable
 {

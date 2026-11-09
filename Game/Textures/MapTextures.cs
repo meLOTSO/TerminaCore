@@ -8,14 +8,14 @@ namespace Game.Textures;
 
 public static class MapTextures
 {
-    public static Texture GetSea(int width, int height)
+    public static Texture GetNoiseTexture(int width, int height, char symbol)
     {
         if (width < 1 || height < 1)
             throw new ArgumentException("Ширина и высота не могут быть меньше единицы.");
 
         Texture seaTexture = new(width, height, foregroundColor: ConsoleColor.Blue, backgroundColor: ConsoleColor.DarkCyan)
         {
-            IgnoreSet = []
+            IgnoreSet = [symbol == ' ' ? '*' : ' ']
         };
 
         int maxWaves = Math.Min(100, (width * height) / 3);
@@ -26,20 +26,21 @@ public static class MapTextures
             int randY = Random.Shared.Next(height);
 
             int attempts = 0;
-            while (seaTexture[randY, randX] == '~' && attempts < 10)
+            while (seaTexture[randY, randX] == symbol && attempts < 10)
             {
                 randX = Random.Shared.Next(width);
                 randY = Random.Shared.Next(height);
                 attempts++;
             }
 
-            seaTexture[randY, randX] = '~';
+            seaTexture[randY, randX] = symbol;
         }
 
         return seaTexture;
     }
+    public static Texture GetSea(int width, int height) => GetNoiseTexture(width, height, '~');
 
-    public static Texture GetGround(int width, int height, ConsoleColor backgroundColor, int groundSymbolsCount, RenderType renderType, int? startX = null, int? startY = null)
+    public static Texture GetGround(int width, int height, char groundChar, ConsoleColor? foregroundColor, ConsoleColor? backgroundColor, int groundSymbolsCount, RenderType renderType, int? startX = null, int? startY = null)
     {
         if (width < 1 || height < 1)
             throw new ArgumentException("Ширина и высота не могут быть меньше единицы.");
@@ -48,12 +49,11 @@ public static class MapTextures
         if (groundSymbolsCount > width * height)
             throw new ArgumentException("Количество символов для земли не может быть больше площади земли.");
 
-        const char GROUND_CHAR = ' ';
-        const char IGNORE_CHAR = '*';
+        char ignoreChar = groundChar == ' ' ? '*' : ' ';
 
-        Texture groundTexture = new(width, height, IGNORE_CHAR, backgroundColor: backgroundColor)
+        Texture groundTexture = new(width, height, ignoreChar, foregroundColor: foregroundColor, backgroundColor: backgroundColor)
         {
-            IgnoreSet = [IGNORE_CHAR]
+            IgnoreSet = [ignoreChar]
         };
 
         bool[] grounded = new bool[width * height];
@@ -102,7 +102,7 @@ public static class MapTextures
         };
 
         int startIndex = start.Y * width + start.X;
-        groundTexture.SetSymbol(start.Y, start.X, GROUND_CHAR);
+        groundTexture.SetSymbol(start.Y, start.X, groundChar);
         grounded[startIndex] = true;
         inQueue[startIndex] = true;
 
@@ -121,7 +121,7 @@ public static class MapTextures
 
             if (Random.Shared.NextDouble() <= 0.85)
             {
-                groundTexture.SetSymbol(px.Y, px.X, GROUND_CHAR);
+                groundTexture.SetSymbol(px.Y, px.X, groundChar);
                 grounded[cellIdx] = true;
                 placed++;
 
@@ -165,4 +165,7 @@ public static class MapTextures
 
         return groundTexture;
     }
+
+    public static Texture GetGround(int width, int height, ConsoleColor backgroundColor, int groundSymbolsCount, RenderType renderType, int? startX = null, int? startY = null)
+        => GetGround(width, height, ' ', null, backgroundColor, groundSymbolsCount, renderType, startX, startY);
 }
